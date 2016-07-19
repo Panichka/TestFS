@@ -1,0 +1,30 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+// Define IFileSystem interface
+[
+    object,
+    uuid(5B26AF8D-EF23-4f1d-A742-3CC4C2F28980),
+    dual,
+    helpstring("IFileSystem Interface"),
+    pointer_default(unique)
+]
+interface IFileSystem : IUnknown
+{
+};
+
+// Library statement
+[
+    uuid(c145acf1-5472-486c-87bf-497f815ccb58),
+    version(1.0),
+    helpstring("COMServer Type Library")
+]
+library COMServerLib
+{
+    importlib("stdole32.tlb");
+    [uuid(438B8FDC-7DB8-4a3b-9814-931FDAB531DA)]
+    coclass FileSystem
+    {
+        [default] interface IFileSystem;
+    };
+};
