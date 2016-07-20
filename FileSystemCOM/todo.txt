@@ -1,0 +1,4 @@
+! complete .idl file
+? introduce types for path, buffer, handle...
+? what is dual interface
+? thread apartments
