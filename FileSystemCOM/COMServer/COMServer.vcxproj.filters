@@ -27,6 +27,9 @@
     <ClCompile Include="Registrar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FSController.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassFactory.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FSCoClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FSController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

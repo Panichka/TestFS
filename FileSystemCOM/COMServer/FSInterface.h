@@ -1,23 +1,20 @@
 #ifndef __vfs__FSInterface_h__
 #define __vfs__FSInterface_h__
 
-#include <windows.h>
-
 struct IFileSystem : IUnknown
 {
-	STDMETHOD(Create)(LPCSTR inPath, LPVOID outHandle)PURE;
-	STDMETHOD(Open)(LPVOID inHandle)PURE;
-	STDMETHOD(Close)(LPVOID inHandle)PURE;
-	STDMETHOD(Delete)(LPVOID inHandle)PURE;
+	STDMETHOD(CreateFile)(BSTR inPath)PURE;
+   STDMETHOD(CreateDirectory)(BSTR inPath)PURE;
+	STDMETHOD(Delete)(BSTR inPath)PURE;
 
-	STDMETHOD(Find)(LPCSTR inPath, LPVOID outHandle)PURE;
+	STDMETHOD(Exists)(BSTR inPath)PURE;
 	
-	STDMETHOD(List)(LPCSTR inPath, LPCSTR* outEntries)PURE;
+	STDMETHOD(List)(BSTR inPath, SAFEARR_BSTR outEntities)PURE;
 
-	STDMETHOD(GetSize)(LPCSTR inPath, ULONG* outEntrySize)PURE;
+	STDMETHOD(GetSize)(BSTR inPath, ULONG* outEntitySize)PURE;
 
-	STDMETHOD(Read)(LPVOID inHandle, LPVOID outBuffer, ULONG size)PURE;
-	STDMETHOD(Write)(LPVOID inHandle, const LPVOID outBuffer, ULONG size)PURE;
+	STDMETHOD(Read)(BSTR inPath, BYTE_SIZEDARR outBuffer)PURE;
+	STDMETHOD(Write)(BSTR inPath, BYTE_SIZEDARR inBuffer)PURE;
 };
 
 #endif // __vfs__FSInterface_h__

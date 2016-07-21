@@ -1,4 +1,5 @@
 ! complete .idl file
-? introduce types for path, buffer, handle...
-? what is dual interface
 ? thread apartments
+! think about synchronization (may be shared mutex?)
+! extend interface with Copy, Move and Replace methods
+automation-compatible parameters

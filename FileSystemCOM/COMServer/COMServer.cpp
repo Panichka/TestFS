@@ -1,5 +1,3 @@
-#include <memory>
-#include <windows.h>
 #include "COMServer.h"
 #include "ClassFactory.h"
 #include "GUIDs.h"

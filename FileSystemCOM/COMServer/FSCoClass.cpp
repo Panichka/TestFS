@@ -28,46 +28,41 @@ STDMETHODIMP_(ULONG) FileSystem::Release()
    return counterValue;
 }
 
-STDMETHODIMP FileSystem::Create(LPCSTR inPath, PVOID outHandle)
+STDMETHODIMP FileSystem::CreateFile(BSTR inPath)
 {
 	return S_OK;
 }
 
-STDMETHODIMP FileSystem::Open(PVOID inHandle)
+STDMETHODIMP FileSystem::CreateDirectory(BSTR inPath)
+{
+   return S_OK;
+}
+
+STDMETHODIMP FileSystem::Delete(BSTR inPath)
 {
 	return S_OK;
 }
 
-STDMETHODIMP FileSystem::Close(PVOID inHandle)
+STDMETHODIMP FileSystem::Exists(BSTR inPath)
 {
 	return S_OK;
 }
 
-STDMETHODIMP FileSystem::Delete(PVOID inHandle)
+STDMETHODIMP FileSystem::List(BSTR inPath, SAFEARR_BSTR outEntities)
 {
 	return S_OK;
 }
 
-STDMETHODIMP FileSystem::Find(LPCSTR inPath, PVOID outHandle)
+STDMETHODIMP FileSystem::GetSize(BSTR inPath, ULONG* outEntitySize)
 {
 	return S_OK;
 }
 
-STDMETHODIMP FileSystem::List(LPCSTR inPath, LPCSTR* outEntries)
+STDMETHODIMP FileSystem::Read(BSTR inPath, BYTE_SIZEDARR outBuffer)
 {
 	return S_OK;
 }
-
-STDMETHODIMP FileSystem::GetSize(LPCSTR inPath, ULONG* outEntrySize)
-{
-	return S_OK;
-}
-
-STDMETHODIMP FileSystem::Read(PVOID inHandle, PVOID outBuffer, ULONG size)
-{
-	return S_OK;
-}
-STDMETHODIMP FileSystem::Write(PVOID inHandle, const PVOID outBuffer, ULONG size)
+STDMETHODIMP FileSystem::Write(BSTR inPath, BYTE_SIZEDARR inBuffer)
 {
 	return S_OK;
 }
