@@ -1,5 +1,5 @@
 ! complete .idl file
-? thread apartments
 ! think about synchronization (may be shared mutex?)
 ! extend interface with Copy, Move and Replace methods
-automation-compatible parameters
+! paths instead strings
+! handles instead paths

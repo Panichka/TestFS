@@ -2,6 +2,7 @@
 #define __vfs__COMInterfaceImpl_h__
 
 #include "FSInterface.h"
+#include "ReferenceCounter.h"
 
 class FileSystem : public IFileSystem
 {
@@ -31,7 +32,7 @@ public:
    STDMETHOD(Write)(BSTR inPath, BYTE_SIZEDARR inBuffer) override;
 
 private:
-   ULONG m_refCounter;
+   NCOMServer::ReferenceCounter m_refCounter;
 };
 
 #endif // __vfs__COMInterfaceImpl_h__

@@ -1,16 +1,16 @@
 #include "ClassFactory.h"
 #include "FSCoClass.h"
 
-ClassFactory::ClassFactory(ULONG& instCounter)
-   : m_refCounter(1ul)
+ClassFactory::ClassFactory(NCOMServer::ReferenceCounter& instCounter)
+   : m_refCounter(1u)
    , m_lockCounter(instCounter)
 {
-   InterlockedIncrement(&m_lockCounter);
+   ++m_lockCounter;
 }
 
 ClassFactory::~ClassFactory()
 {
-   InterlockedDecrement(&m_lockCounter);
+   --m_lockCounter;
 }
 
 //
@@ -31,7 +31,7 @@ IFACEMETHODIMP ClassFactory::QueryInterface(REFIID riid, void **ppv)
    else
    {
       result = E_NOINTERFACE;
-      *ppv = NULL;
+      *ppv = nullptr;
    }
 
    return result;
@@ -39,18 +39,17 @@ IFACEMETHODIMP ClassFactory::QueryInterface(REFIID riid, void **ppv)
 
 IFACEMETHODIMP_(ULONG) ClassFactory::AddRef()
 {
-   return InterlockedIncrement(&m_refCounter);
+   return ++m_refCounter;
 }
 
 IFACEMETHODIMP_(ULONG) ClassFactory::Release()
 {
-   auto counterValue = InterlockedDecrement(&m_refCounter);
+   auto counterValue = --m_refCounter;
    if (0l == counterValue)
       delete this;
 
    return counterValue;
 }
-
 
 // 
 // IClassFactory
@@ -61,15 +60,15 @@ IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, vo
    HRESULT result = CLASS_E_NOAGGREGATION;
 
    // aggregation is not implemented
-   if (pUnkOuter == NULL)
+   if (nullptr == pUnkOuter)
    {
       result = E_OUTOFMEMORY;
 
-      FileSystem *pSimpleObj = new FileSystem();
-      if (pSimpleObj)
+      auto fsObj = new FileSystem();
+      if (nullptr == fsObj)
       {
-         result = pSimpleObj->QueryInterface(riid, ppv);
-         pSimpleObj->Release();
+         result = fsObj->QueryInterface(riid, ppv);
+         fsObj->Release();
       }
    }
 
@@ -78,8 +77,7 @@ IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, vo
 
 IFACEMETHODIMP ClassFactory::LockServer(BOOL lock)
 {
-   lock ?
-      InterlockedIncrement(&m_lockCounter) : InterlockedDecrement(&m_lockCounter);
+   lock ? ++m_lockCounter : --m_lockCounter;
 
    return S_OK;
 }

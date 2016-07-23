@@ -14,7 +14,7 @@ namespace NFileSystem
    public:
       explicit AlreadyExists() noexcept = default;
 
-      virtual const char* what() const noexcept
+      const char* what() const noexcept override
       {
          return "Entity already exists in this location";
       }
@@ -25,7 +25,7 @@ namespace NFileSystem
    public:
       explicit DoesNotExists() noexcept = default;
 
-      virtual const char* what() const noexcept
+      const char* what() const noexcept override
       {
          return "Entity doen't exists in this location";
       }
@@ -36,7 +36,7 @@ namespace NFileSystem
    public:
       explicit IsLocked() noexcept = default;
 
-      virtual const char* what() const noexcept
+      const char* what() const noexcept override
       {
          return "Entity is locked by another process";
       }

@@ -3,12 +3,15 @@
 #include "GUIDs.h"
 #include "Registrar.h"
 
-ULONG instCounter = 0ul;
-HANDLE g_module;
+namespace
+{
+   NCOMServer::ReferenceCounter instCounter(0u);
+   HANDLE g_module;
+}
 
 BOOL APIENTRY DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*lpReserved*/)
 {
-    switch (dwReason)
+   switch (dwReason)
 	{
 		case DLL_PROCESS_ATTACH: 
 			g_module = hInstance;
@@ -18,44 +21,41 @@ BOOL APIENTRY DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID /*lpReserved*/
 		case DLL_THREAD_DETACH:
 		case DLL_PROCESS_DETACH:
 			break;
-    }
+   }
 
-    return TRUE;
+   return TRUE;
 }
 
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID *ppvOut)
 {
-	*ppvOut = NULL;
-    if (IsEqualIID(rclsid, CLSID_FS))
-    {
-       auto factory = new ClassFactory(instCounter);
-       auto result = factory->QueryInterface(riid, ppvOut);
+	*ppvOut = nullptr;
+   if (IsEqualIID(rclsid, CLSID_FS))
+   {
+      auto factory = new ClassFactory(instCounter);
+      auto result = factory->QueryInterface(riid, ppvOut);
 	   factory->Release();
 	   return result;
-    }
+   }
 
-    return CLASS_E_CLASSNOTAVAILABLE;
+   return CLASS_E_CLASSNOTAVAILABLE;
 }
 
 STDAPI DllCanUnloadNow(void)
 {
-	//if < 0 ??
-    return 0l == InterlockedXor(reinterpret_cast<unsigned long long*>(&instCounter), 0ul) ? S_OK : S_FALSE;
+   return instCounter == 0u ? S_OK : S_FALSE;
 }
 
 STDAPI DllRegisterServer(void)
 {
-	DllRegistrar registrar;
 	char path [MAX_PATH];
 	GetModuleFileName(static_cast<HMODULE>(g_module), path, MAX_PATH);
-	return registrar.RegisterObject(CLSID_FS, "VirtualFileSystemLib", "VirtualFileSystemObj", path) ?
+	return NCOMServer::RegisterObject(CLSID_FS, "VirtualFileSystemLib", "VirtualFileSystemObj", path) ?
       S_OK : S_FALSE;
 }
 
 STDAPI DllUnregisterServer(void)
 {
-	DllRegistrar registrar;
-	return registrar.UnRegisterObject(CLSID_FS, "VirtualFileSystemLib", "VirtualFileSystemObj") ?
+	return NCOMServer::UnRegisterObject(CLSID_FS, "VirtualFileSystemLib", "VirtualFileSystemObj") ?
       S_OK : S_FALSE;
 }
 

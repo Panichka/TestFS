@@ -3,29 +3,31 @@
 
 #include <unknwn.h>
 #include <windows.h>
- 
+
+#include "ReferenceCounter.h"
+
 class ClassFactory : public IClassFactory
 {
 public:
-   ClassFactory(ULONG& instCounter);
+   explicit ClassFactory(NCOMServer::ReferenceCounter& instCounter);
    ClassFactory(const ClassFactory&) = delete;
    void operator=(const ClassFactory&) = delete;
 
    // IUnknown
-   IFACEMETHODIMP QueryInterface(REFIID riid, void **ppv);
-   IFACEMETHODIMP_(ULONG) AddRef();
-   IFACEMETHODIMP_(ULONG) Release();
+   IFACEMETHODIMP QueryInterface(REFIID riid, void **ppv) override;
+   IFACEMETHODIMP_(ULONG) AddRef() override;
+   IFACEMETHODIMP_(ULONG) Release() override;
 
    // IClassFactory
-   IFACEMETHODIMP CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppv);
-   IFACEMETHODIMP LockServer(BOOL lock);
+   IFACEMETHODIMP CreateInstance(IUnknown *pUnkOuter, REFIID riid, void **ppv) override;
+   IFACEMETHODIMP LockServer(BOOL lock) override;
 
 protected:
    virtual ~ClassFactory();
 
 private:
-   ULONG m_refCounter;
-   ULONG& m_lockCounter;
+   NCOMServer::ReferenceCounter m_refCounter;
+   NCOMServer::ReferenceCounter& m_lockCounter;
 };
 
 #endif // __vfs__ClassFactory_h__

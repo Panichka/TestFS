@@ -4,7 +4,7 @@
 
 STDMETHODIMP FileSystem::QueryInterface(REFIID riid, LPVOID *ppv)
 {
-	*ppv = NULL;
+	*ppv = nullptr;
 	if(IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_FS))
 	{
 		*ppv = static_cast<IFileSystem*>(this);
@@ -16,13 +16,13 @@ STDMETHODIMP FileSystem::QueryInterface(REFIID riid, LPVOID *ppv)
 
 STDMETHODIMP_(ULONG) FileSystem::AddRef()
 {
-   return InterlockedIncrement(&m_refCounter);
+   return ++m_refCounter;
 }
 
 STDMETHODIMP_(ULONG) FileSystem::Release()
 {
-   auto counterValue = InterlockedDecrement(&m_refCounter);
-   if (0l == counterValue)
+   auto counterValue = --m_refCounter;
+   if (0u == counterValue)
       delete this;
 
    return counterValue;
