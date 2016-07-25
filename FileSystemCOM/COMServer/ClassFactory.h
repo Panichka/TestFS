@@ -9,7 +9,9 @@
 class ClassFactory : public IClassFactory
 {
 public:
-   explicit ClassFactory(NCOMServer::ReferenceCounter& instCounter);
+   static const NCOMServer::ReferenceCounter& InstanceCounter();
+
+   ClassFactory();
    ClassFactory(const ClassFactory&) = delete;
    void operator=(const ClassFactory&) = delete;
 
@@ -27,7 +29,6 @@ protected:
 
 private:
    NCOMServer::ReferenceCounter m_refCounter;
-   NCOMServer::ReferenceCounter& m_lockCounter;
 };
 
 #endif // __vfs__ClassFactory_h__

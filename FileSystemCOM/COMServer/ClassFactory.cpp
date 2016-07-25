@@ -1,16 +1,29 @@
 #include "ClassFactory.h"
 #include "FSCoClass.h"
 
-ClassFactory::ClassFactory(NCOMServer::ReferenceCounter& instCounter)
-   : m_refCounter(1u)
-   , m_lockCounter(instCounter)
+namespace
 {
-   ++m_lockCounter;
+   NCOMServer::ReferenceCounter& RefCounter()
+   {
+      static NCOMServer::ReferenceCounter counter(0u);
+      return counter;      
+   }
+}
+
+const NCOMServer::ReferenceCounter& ClassFactory::InstanceCounter()
+{
+   return RefCounter();
+}
+
+ClassFactory::ClassFactory()
+   : m_refCounter(1u)
+{
+   ++RefCounter();
 }
 
 ClassFactory::~ClassFactory()
 {
-   --m_lockCounter;
+   --RefCounter();
 }
 
 //
@@ -77,7 +90,7 @@ IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, vo
 
 IFACEMETHODIMP ClassFactory::LockServer(BOOL lock)
 {
-   lock ? ++m_lockCounter : --m_lockCounter;
+   lock ? ++RefCounter() : --RefCounter();
 
    return S_OK;
 }
