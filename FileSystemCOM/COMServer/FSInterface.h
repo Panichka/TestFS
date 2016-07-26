@@ -13,7 +13,7 @@ struct IFileSystem : IUnknown
 
 	STDMETHOD(GetSize)(BSTR inPath, ULONG* outEntitySize)PURE;
 
-	STDMETHOD(Read)(BSTR inPath, BYTE_SIZEDARR outBuffer)PURE;
+	STDMETHOD(Read)(BSTR inPath, ULONG Count, BYTE_SIZEDARR* outBuffer)PURE;
 	STDMETHOD(Write)(BSTR inPath, BYTE_SIZEDARR inBuffer)PURE;
 };
 

@@ -29,13 +29,13 @@ namespace NCOMServer
    {
       auto current = m_counter->Value.load();
 
-      while (!(0u == current || m_counter->Value.compare_exchange_strong(current, current - 1)))
+      while (!(0u == current || m_counter->Value.compare_exchange_weak(current, current - 1)))
       { ; }
 
       return current;
    }
 
-   bool ReferenceCounter::operator==(const uint32_t& to) const
+   bool ReferenceCounter::operator==(uint32_t to) const
    {
       auto current = to;
       return m_counter->Value.compare_exchange_strong(current, to);

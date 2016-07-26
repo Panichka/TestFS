@@ -17,7 +17,7 @@ namespace NCOMServer
       uint32_t operator++();
       uint32_t operator--();
 
-      bool operator==(const uint32_t&) const;
+      bool operator==(uint32_t) const;
 
    private:
       struct AtomicCounter;

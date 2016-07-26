@@ -56,8 +56,7 @@ namespace NCOMServer
       else
          sprintf_s(buffer, MAX_PATH, "%s.%s\\CLSID", libId, classId);
 
-      BOOL result;
-      result = SetInRegistry(HKEY_CLASSES_ROOT, buffer, "", strCLSID);
+      auto result = SetInRegistry(HKEY_CLASSES_ROOT, buffer, "", strCLSID);
       if (!result)
          return false;
 
@@ -74,7 +73,7 @@ namespace NCOMServer
          return false;
 
       sprintf_s(buffer, MAX_PATH, "CLSID\\%s\\InProcServer32", strCLSID);
-      return SetInRegistry(HKEY_CLASSES_ROOT, buffer, "", path) ? true : false;
+      return SetInRegistry(HKEY_CLASSES_ROOT, buffer, "", path);
    }
 
    bool UnRegisterObject(REFIID riid, LPCSTR libId, LPCSTR classId)
@@ -102,6 +101,6 @@ namespace NCOMServer
          return false;
 
       sprintf_s(buffer, MAX_PATH, "CLSID\\%s", strCLSID);
-      return !DelFromRegistry(HKEY_CLASSES_ROOT, buffer) ? true : false;
+      return DelFromRegistry(HKEY_CLASSES_ROOT, buffer);
    }
 } // namespace NCOMServer

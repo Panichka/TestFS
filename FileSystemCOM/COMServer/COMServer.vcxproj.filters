@@ -13,6 +13,12 @@
       <UniqueIdentifier>{432bb29a-4d49-4ef3-a077-fd7e61afea31}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="FileSystemImpl">
+      <UniqueIdentifier>{6922c6b5-0ec9-4dc8-b4f8-23f960c7761f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FileSystemImpl">
+      <UniqueIdentifier>{17c53775-9396-4a5f-a16c-5a9d313c271f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClassFactory.cpp">
@@ -27,11 +33,14 @@
     <ClCompile Include="Registrar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FSController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ReferenceCounter.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FSController.cpp">
+      <Filter>Source Files\FileSystemImpl</Filter>
+    </ClCompile>
+    <ClCompile Include="FSEntity.cpp">
+      <Filter>Source Files\FileSystemImpl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,20 +53,26 @@
     <ClInclude Include="Registrar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FSInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GUIDs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FSCoClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FSController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ReferenceCounter.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FSInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FSExceptions.h">
+      <Filter>FileSystemImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="FSController.h">
+      <Filter>FileSystemImpl</Filter>
+    </ClInclude>
+    <ClInclude Include="FSEntity.h">
+      <Filter>FileSystemImpl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

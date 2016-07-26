@@ -4,10 +4,15 @@
 #include "FSInterface.h"
 #include "ReferenceCounter.h"
 
+namespace NFileSystem
+{
+   struct Controller;
+}
+
 class FileSystem : public IFileSystem
 {
 public:
-	FileSystem() = default;
+	FileSystem();
    FileSystem(const FileSystem&) = delete;
    void operator=(const FileSystem&) = delete;
 	virtual ~FileSystem() = default;
@@ -28,11 +33,12 @@ public:
 
    STDMETHOD(GetSize)(BSTR inPath, ULONG* outEntitySize) override;
 
-   STDMETHOD(Read)(BSTR inPath, BYTE_SIZEDARR outBuffer) override;
+   STDMETHOD(Read)(BSTR inPath, ULONG Count, BYTE_SIZEDARR* outBuffer) override;
    STDMETHOD(Write)(BSTR inPath, BYTE_SIZEDARR inBuffer) override;
 
 private:
    NCOMServer::ReferenceCounter m_refCounter;
+   std::unique_ptr<NFileSystem::Controller> m_controller;
 };
 
 #endif // __vfs__COMInterfaceImpl_h__

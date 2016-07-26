@@ -1,58 +1,81 @@
+#include <boost/filesystem.hpp>
+
 #include "FSController.h"
+#include "FSExceptions.h"
+
 namespace NFileSystem
 {
-   uint32_t Controller::Directory::Size() const
+   struct ControlBlock
    {
-      uint32_t totalSize = 0ul;
-      for (const auto& item : m_Contents)
-         totalSize += item.second->Size();
+      static ControlBlock& Instance()
+      {
+         static ControlBlock instance;
+         return instance;
+      }
 
-      return totalSize;
-   }
+      static const Path& PhysicalFileName()
+      {
+         static boost::system::error_code eCode;
+         static const Path path(boost::filesystem::current_path(eCode) /= "fsdata");
 
-   void Controller::Directory::AddEntity(std::string name, std::unique_ptr<Entity> entity)
+         if (boost::system::errc::success != eCode)
+            throw InternalError();
+
+         return path;
+      }
+
+      Directory Root;
+
+   private:
+      ControlBlock();
+
+      ControlBlock(const ControlBlock&) = delete;
+      void operator=(const ControlBlock&) = delete;
+   };
+
+   ControlBlock::ControlBlock()
+      : Root(Entity::Category::Directory)
    {
-      if (!m_Contents.insert(std::make_pair(std::move(name), std::move(entity))).second)
-         throw AlreadyExists();
-   }
-
-   void Controller::Directory::RemoveEntity(const std::string& name)
-   {
-      m_Contents.erase(name);
-   }
-
-   OptionalReference<const Controller::Directory::Entity> Controller::Directory::FindEntity(const std::string& name) const
-   {
-      auto it = m_Contents.find(name);
-      if (m_Contents.cend() != it)
-         return boost::make_optional(std::cref(*it->second));
-
-      return boost::none;
-   }
-
-   OptionalReference<Controller::Directory::Entity> Controller::Directory::FindEntity(const std::string& name)
-   {
-      auto constResult = const_cast<const Directory&>(*this).FindEntity(name);
-      if (constResult)
-         return boost::make_optional(std::ref(const_cast<Entity&>(constResult->get())));
-
-      return boost::none;
+      if (boost::filesystem::exists(PhysicalFileName()))
+         ;
    }
 
    Controller::Controller()
-      : m_controlBlock()
    {
-      LoadControlBlock();
+
    }
 
    Controller::~Controller()
    {
-      FlushControlBlock();
+
    }
 
-   void Controller::LoadControlBlock()
+   void Controller::Create(const Path& path, Entity::Category category)
    {}
 
-   void Controller::FlushControlBlock() 
+   void Controller::Delete(const Path& path)
+   {}
+
+   bool Controller::Exists(const Path& path)
+   {
+      return false;
+   }
+
+   std::list<std::wstring> Controller::List(const Path& path)
+   {
+      return std::list<std::wstring>();
+   }
+
+   uint64_t Controller::Size(const Path& path)
+   {
+      return 0u;
+   }
+
+   ManagedArray Controller::Read(const Path& path, uint64_t count)
+   {
+      return ManagedArray(std::make_pair(nullptr, 0u));
+   }
+
+   void Controller::Write(const Path& path, const uint8_t* buffer, uint64_t count)
    {}
 } // namespace NFileSystem
