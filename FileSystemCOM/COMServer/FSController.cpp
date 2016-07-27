@@ -19,7 +19,7 @@ namespace NFileSystem
          static const Path path(boost::filesystem::current_path(eCode) /= "fsdata");
 
          if (boost::system::errc::success != eCode)
-            throw InternalError();
+            throw Exception(ErrorCode::InternalError);
 
          return path;
       }
@@ -34,7 +34,7 @@ namespace NFileSystem
    };
 
    ControlBlock::ControlBlock()
-      : Root(Entity::Category::Directory)
+      : Root()
    {
       if (boost::filesystem::exists(PhysicalFileName()))
          ;
@@ -50,10 +50,12 @@ namespace NFileSystem
 
    }
 
-   void Controller::Create(const Path& path, Entity::Category category)
-   {}
+   Controller::EntityHandle Controller::Create(const Path& path, Entity::Category category)
+   {
+      return 0u;
+   }
 
-   void Controller::Delete(const Path& path)
+   void Controller::Delete(Controller::EntityHandle handle)
    {}
 
    bool Controller::Exists(const Path& path)
@@ -61,21 +63,21 @@ namespace NFileSystem
       return false;
    }
 
-   std::list<std::wstring> Controller::List(const Path& path)
+   std::list<std::wstring> Controller::List(Controller::EntityHandle handle)
    {
       return std::list<std::wstring>();
    }
 
-   uint64_t Controller::Size(const Path& path)
+   uint64_t Controller::Size(Controller::EntityHandle handle)
    {
       return 0u;
    }
 
-   ManagedArray Controller::Read(const Path& path, uint64_t count)
+   ManagedArray Controller::Read(Controller::EntityHandle handle, uint64_t count)
    {
       return ManagedArray(std::make_pair(nullptr, 0u));
    }
 
-   void Controller::Write(const Path& path, const uint8_t* buffer, uint64_t count)
+   void Controller::Write(Controller::EntityHandle handle, const uint8_t* buffer, uint64_t count)
    {}
 } // namespace NFileSystem

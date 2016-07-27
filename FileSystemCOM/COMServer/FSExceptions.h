@@ -1,52 +1,22 @@
 #ifndef __vfs__FSExceptions_h__
 #define __vfs__FSExceptions_h__
 
-#include <exception>
+#include <string>
 
 namespace NFileSystem
 {
-   class InternalError : public std::exception
+   enum class ErrorCode : uint8_t
+   { InternalError, AlreadyExists, DoesNotExists, IsLocked};
+
+   class Exception : public std::exception
    {
    public:
-      explicit InternalError() noexcept = default;
+      explicit Exception(ErrorCode code) noexcept;
 
-      const char* what() const noexcept override
-      {
-         return "Controller internal error";
-      }
-   };
+      const char* what() const noexcept override;
 
-   class AlreadyExists : public std::exception
-   {
-   public:
-      explicit AlreadyExists() noexcept = default;
-
-      const char* what() const noexcept override
-      {
-         return "Entity already exists in this location";
-      }
-   };
-
-   class DoesNotExists : public std::exception
-   {
-   public:
-      explicit DoesNotExists() noexcept = default;
-
-      const char* what() const noexcept override
-      {
-         return "Entity doen't exists in this location";
-      }
-   };
-
-   class IsLocked : public std::exception
-   {
-   public:
-      explicit IsLocked() noexcept = default;
-
-      const char* what() const noexcept override
-      {
-         return "Entity is locked by another process";
-      }
+      static const std::string& Message(ErrorCode code);
+      const ErrorCode Code;
    };
 } // namespace NFileSystem
 

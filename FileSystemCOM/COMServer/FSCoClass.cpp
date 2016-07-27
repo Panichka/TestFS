@@ -1,6 +1,9 @@
 #include <functional>
+#include <climits>
+
 #include <windows.h>
 #include <comdef.h>
+
 #include "GUIDs.h"
 #include "FSCoClass.h"
 #include "FSController.h"
@@ -38,29 +41,22 @@ STDMETHODIMP_(ULONG) FileSystem::Release()
 
 namespace
 {
-   NFileSystem::Path BSTRToPath(BSTR pathStr)
-   {
-      _bstr_t wrapper(pathStr, false);
-      std::unique_ptr<const wchar_t> raw(static_cast<const wchar_t*>(wrapper));
-      wrapper.Detach();
-
-      return NFileSystem::Path(raw.get());
-   }
-
-   BSTR wstringToBSTR(const std::wstring& str)
-   {
-      _bstr_t wrapper(str.c_str());
-      return wrapper.Detach();
-   }
-
    ULONG CastIfNoOverflow(size_t value)
    {
-      constexpr ULONG maxULong = ULONG(0) - 1;
-      if (value > maxULong)
+      if (value > ULONG_MAX)
          throw std::overflow_error("msg is not used");
 
       return static_cast<ULONG>(value);
    }
+
+   struct InterfaceError
+   {
+      explicit InterfaceError(HRESULT code)
+         : Code(code)
+      {}
+
+      HRESULT Code;
+   };
 
    HRESULT CatchAll(const std::function<void()>& action)
    {
@@ -69,50 +65,67 @@ namespace
          action();
          return S_OK;
       }
+      catch(const InterfaceError& error)
+      {
+	      return error.Code;
+      }
+      catch (const NFileSystem::Exception& error)
+      {
+         using namespace NFileSystem;
+         switch (error.Code)
+         {
+         case ErrorCode::InternalError:
+         case ErrorCode::AlreadyExists:
+         case ErrorCode::DoesNotExists:
+         case ErrorCode::IsLocked:
+         default:
+            return E_FAIL;
+         }         
+      }
       catch (...)
       {
-         return S_FALSE;
+         return E_FAIL;
       }
    }
 }
 
-STDMETHODIMP FileSystem::CreateFile(BSTR inPath)
+STDMETHODIMP FileSystem::CreateFile(LPOLESTR inPath)
 {
    return CatchAll([this, inPath]()
    {
-      m_controller->Create(BSTRToPath(inPath), NFileSystem::Entity::Category::File);
+      m_controller->Create(NFileSystem::Path(inPath), NFileSystem::Entity::Category::File);
    });
 }
 
-STDMETHODIMP FileSystem::CreateDirectory(BSTR inPath)
+STDMETHODIMP FileSystem::CreateDirectory(LPOLESTR inPath)
 {
    return CatchAll([this, inPath]()
    {
-      m_controller->Create(BSTRToPath(inPath), NFileSystem::Entity::Category::Directory);
+      m_controller->Create(NFileSystem::Path(inPath), NFileSystem::Entity::Category::Directory);
    });
 }
 
-STDMETHODIMP FileSystem::Delete(BSTR inPath)
+STDMETHODIMP FileSystem::Delete(ULONG inHandle)
+{
+   return CatchAll([this, inHandle]()
+   {
+      m_controller->Delete(inHandle);
+   });
+}
+
+STDMETHODIMP FileSystem::Exists(LPOLESTR inPath)
 {
    return CatchAll([this, inPath]()
    {
-      m_controller->Delete(BSTRToPath(inPath));
+      m_controller->Exists(NFileSystem::Path(inPath));
    });
 }
 
-STDMETHODIMP FileSystem::Exists(BSTR inPath)
+STDMETHODIMP FileSystem::List(ULONG inHandle, SAFEARR_BSTR outEntities)
 {
-   return CatchAll([this, inPath]()
+   return CatchAll([this, inHandle, &outEntities]()
    {
-      m_controller->Exists(BSTRToPath(inPath));
-   });
-}
-
-STDMETHODIMP FileSystem::List(BSTR inPath, SAFEARR_BSTR outEntities)
-{
-   return CatchAll([this, inPath, &outEntities]()
-   {
-      auto entities = m_controller->List(BSTRToPath(inPath));
+      auto entities = m_controller->List(inHandle);
       
       outEntities.Size = CastIfNoOverflow(entities.size());
       outEntities.aBstr = new wireBSTR[outEntities.Size];
@@ -128,45 +141,45 @@ STDMETHODIMP FileSystem::List(BSTR inPath, SAFEARR_BSTR outEntities)
    });
 }
 
-STDMETHODIMP FileSystem::GetSize(BSTR inPath, ULONG* outEntitySize)
+STDMETHODIMP FileSystem::GetSize(ULONG inHandle, ULONG* outEntitySize)
 {
-   return CatchAll([this, inPath, outEntitySize]()
+   return CatchAll([this, inHandle, outEntitySize]()
    {
       if (nullptr == outEntitySize)
-         throw std::runtime_error("msg is not used");
+         throw InterfaceError(E_INVALIDARG);
 
       *outEntitySize =
-         CastIfNoOverflow(m_controller->Size(BSTRToPath(inPath)));
+         CastIfNoOverflow(m_controller->Size(inHandle));
    });
 }
 
-STDMETHODIMP FileSystem::Read(BSTR inPath, ULONG Count, BYTE_SIZEDARR* outBuffer)
+STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuffer)
 {
-   return CatchAll([this, inPath, Count, &outBuffer]()
+   return CatchAll([this, inHandle, Count, &outBuffer]()
    {
       if (nullptr == outBuffer)
-         throw std::runtime_error("msg is not used");
+         throw InterfaceError(E_INVALIDARG);
 
-      auto readResult = m_controller->Read(BSTRToPath(inPath), Count);
+      auto readResult = m_controller->Read(inHandle, Count);
       if (!readResult.first)
-         throw std::runtime_error("msg is not used");
+         throw InterfaceError(E_UNEXPECTED);
       
       outBuffer->clSize = CastIfNoOverflow(readResult.second);
       outBuffer->pData = readResult.first.get();
       readResult.first.release();
    });
-} 
-STDMETHODIMP FileSystem::Write(BSTR inPath, BYTE_SIZEDARR inBuffer)
+}
+
+STDMETHODIMP FileSystem::Write(ULONG inHandle, BYTE_SIZEDARR inBuffer)
 {
-   return CatchAll([this, inPath, &inBuffer]()
+   return CatchAll([this, inHandle, &inBuffer]()
    {
       if (0u == inBuffer.clSize)
          return;
 
       if (nullptr == inBuffer.pData)
-         throw std::runtime_error("msg is not used");
+         throw InterfaceError(E_INVALIDARG);
 
-      m_controller->Write(BSTRToPath(inPath),
-         inBuffer.pData, inBuffer.clSize);
+      m_controller->Write(inHandle, inBuffer.pData, inBuffer.clSize);
    });
 }

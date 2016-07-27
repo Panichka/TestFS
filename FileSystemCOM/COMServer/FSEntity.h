@@ -14,7 +14,7 @@ namespace NFileSystem
 
    struct Entity
    {
-      virtual uint32_t Size() const = 0;
+      virtual uint64_t Size() const = 0;
       virtual ~Entity() = default;
 
       enum class Category { File, Directory };
@@ -24,38 +24,45 @@ namespace NFileSystem
          : category(cat)
       {}
 
-      Entity() = delete;
-      void operator=(const Entity&) = delete;
+     Entity() = delete;
+	  Entity(const Entity&) = delete;
+	  void operator=(const Entity&) = delete;
    };
 
    struct File : Entity
    {
-      using Entity::Entity;
-      File() = delete;
+      File();
+      File(const File& src); 
+      File& operator=(const File& src);
 
-      uint32_t Size() const override { return m_size; }
+      uint64_t Size() const override { return m_size; }
       uint64_t Offset() const { return m_offset; }
 
    private:
-      uint32_t m_size = 0u;
+      uint64_t m_size = 0u;
       uint64_t m_offset = 0ull;
    };
 
    struct Directory : Entity
    {
-      using Entity::Entity;
-      Directory() = delete;
+      Directory();
 
-      uint32_t Size() const override;
+      Directory(const Directory& src);
+      Directory(Directory&& src);
 
-      void AddEntity(std::wstring, std::unique_ptr<Entity>);
+      Directory& operator=(const Directory& src);
+      Directory& operator=(Directory&& src);
+
+      uint64_t Size() const override;
+
+      void AddEntity(std::wstring, std::shared_ptr<Entity>);
       void RemoveEntity(const std::wstring&);
 
       OptionalReference<const Entity> FindEntity(const std::wstring&) const;
       OptionalReference<Entity> FindEntity(const std::wstring&);
 
    private:
-      std::unordered_map<std::wstring, std::unique_ptr<Entity>> m_Contents;
+      std::unordered_map<std::wstring, std::shared_ptr<Entity>> m_contents;
    };
 } // namespace NFileSystem
 

@@ -6,28 +6,35 @@
 #include <boost/filesystem/path.hpp>
 
 #include "FSEntity.h"
+#include <set>
 
 namespace NFileSystem
 {
    using Path = boost::filesystem::path;
    using ManagedArray = std::pair<std::unique_ptr<uint8_t[]>, uint64_t>;
 
-   struct Controller final
+   class Controller final
    {
+   public:
       Controller();
       ~Controller();	
 
-      void Create(const Path& path, Entity::Category category);
-      void Delete(const Path& path);
-
+      using EntityHandle = uint32_t;
+      
       bool Exists(const Path& path);
 
-      std::list<std::wstring> List(const Path& path);
+      EntityHandle Create(const Path& path, Entity::Category category);
+      void Delete(EntityHandle handle);
 
-      uint64_t Size(const Path& path);
+      std::list<std::wstring> List(EntityHandle handle);
 
-      ManagedArray Read(const Path& path, uint64_t count);
-      void Write(const Path& path, const uint8_t* buffer, uint64_t count);
+      uint64_t Size(EntityHandle handle);
+
+      ManagedArray Read(EntityHandle handle, uint64_t count);
+      void Write(EntityHandle handle, const uint8_t* buffer, uint64_t count);
+
+   private:
+      std::unordered_map<EntityHandle, std::weak_ptr<Entity>> m_contents;
    };
 } // namespace NFileSystem
 

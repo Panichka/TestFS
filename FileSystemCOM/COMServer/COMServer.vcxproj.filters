@@ -42,6 +42,9 @@
     <ClCompile Include="FSEntity.cpp">
       <Filter>Source Files\FileSystemImpl</Filter>
     </ClCompile>
+    <ClCompile Include="FSExceptions.cpp">
+      <Filter>Source Files\FileSystemImpl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClassFactory.h">
