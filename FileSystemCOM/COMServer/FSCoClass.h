@@ -23,17 +23,18 @@ public:
    STDMETHOD_(ULONG, Release)() override;
 
 	// IFileSystem methods
-   STDMETHOD(CreateFile)(LPOLESTR inPath)override;
-   STDMETHOD(CreateDirectory)(LPOLESTR inPath)override;
+   STDMETHOD(Root)(ULONG* outRootHandle) const override;
+   STDMETHOD(CreateFile)(ULONG inLocationHandle, LPOLESTR inName, ULONG* outCreatedHandle) override;
+   STDMETHOD(CreateDirectory)(ULONG inLocationHandle, LPOLESTR inName, ULONG* outCreatedHandle) override;
    STDMETHOD(Delete)(ULONG inHandle) override;
 
-   STDMETHOD(Exists)(LPOLESTR inPath) override;
+   STDMETHOD(Exists)(ULONG inLocationHandle, LPOLESTR inName, BOOL* outResult) const override;
+   STDMETHOD(List)(ULONG inHandle, SAFEARR_BSTR outEntities) const override;
 
-   STDMETHOD(List)(ULONG inHandle, SAFEARR_BSTR outEntities) override;
+   STDMETHOD(GetName)(ULONG inHandle, LPOLESTR outName) const override;
+   STDMETHOD(GetSize)(ULONG inHandle, ULONG* outEntitySize) const override;
 
-   STDMETHOD(GetSize)(ULONG inHandle, ULONG* outEntitySize) override;
-
-   STDMETHOD(Read)(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuffer) override;
+   STDMETHOD(Read)(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuffer) const override;
    STDMETHOD(Write)(ULONG inHandle, BYTE_SIZEDARR inBuffer) override;
 
 private:

@@ -72,15 +72,9 @@ namespace
       catch (const NFileSystem::Exception& error)
       {
          using namespace NFileSystem;
-         switch (error.Code)
-         {
-         case ErrorCode::InternalError:
-         case ErrorCode::AlreadyExists:
-         case ErrorCode::DoesNotExists:
-         case ErrorCode::IsLocked:
-         default:
-            return E_FAIL;
-         }         
+
+         const HRESULT CustomerDefinedError = 0x20000000;
+         return CustomerDefinedError | static_cast<uint8_t>(error.Code);
       }
       catch (...)
       {
@@ -89,19 +83,39 @@ namespace
    }
 }
 
-STDMETHODIMP FileSystem::CreateFile(LPOLESTR inPath)
+STDMETHODIMP FileSystem::Root(ULONG* outRootHandle) const
 {
-   return CatchAll([this, inPath]()
+   return CatchAll([this, outRootHandle]()
    {
-      m_controller->Create(NFileSystem::Path(inPath), NFileSystem::Entity::Category::File);
+      if (nullptr == outRootHandle)
+         throw InterfaceError(E_INVALIDARG);
+
+      *outRootHandle =
+         CastIfNoOverflow(m_controller->Root());
    });
 }
 
-STDMETHODIMP FileSystem::CreateDirectory(LPOLESTR inPath)
+STDMETHODIMP FileSystem::CreateFile(ULONG inLocationHandle, LPOLESTR inName, ULONG* outCreatedHandle)
 {
-   return CatchAll([this, inPath]()
+   return CatchAll([this, inLocationHandle, inName, outCreatedHandle]()
    {
-      m_controller->Create(NFileSystem::Path(inPath), NFileSystem::Entity::Category::Directory);
+      if (nullptr == inName || nullptr == outCreatedHandle)
+         throw InterfaceError(E_INVALIDARG);
+
+      *outCreatedHandle = 
+         m_controller->Create(inLocationHandle, inName, NFileSystem::EntityCategory::File);
+   });
+}
+
+STDMETHODIMP FileSystem::CreateDirectory(ULONG inLocationHandle, LPOLESTR inName, ULONG* outCreatedHandle)
+{
+   return CatchAll([this, inLocationHandle, inName, &outCreatedHandle]()
+   {
+      if (nullptr == inName || nullptr == outCreatedHandle)
+         throw InterfaceError(E_INVALIDARG);
+
+      *outCreatedHandle =
+         m_controller->Create(inLocationHandle, inName, NFileSystem::EntityCategory::Directory);
    });
 }
 
@@ -113,15 +127,18 @@ STDMETHODIMP FileSystem::Delete(ULONG inHandle)
    });
 }
 
-STDMETHODIMP FileSystem::Exists(LPOLESTR inPath)
+STDMETHODIMP FileSystem::Exists(ULONG inLocationHandle, LPOLESTR inName, BOOL* outResult) const
 {
-   return CatchAll([this, inPath]()
+   return CatchAll([this, inLocationHandle, inName, outResult]()
    {
-      m_controller->Exists(NFileSystem::Path(inPath));
+      if (nullptr == inName || nullptr == outResult)
+         throw InterfaceError(E_INVALIDARG);
+
+      m_controller->Exists(inLocationHandle, inName);
    });
 }
 
-STDMETHODIMP FileSystem::List(ULONG inHandle, SAFEARR_BSTR outEntities)
+STDMETHODIMP FileSystem::List(ULONG inHandle, SAFEARR_BSTR outEntities) const
 {
    return CatchAll([this, inHandle, &outEntities]()
    {
@@ -140,8 +157,19 @@ STDMETHODIMP FileSystem::List(ULONG inHandle, SAFEARR_BSTR outEntities)
       }
    });
 }
+STDMETHODIMP FileSystem::GetName(ULONG inHandle, LPOLESTR outName) const
+{
+   return CatchAll([this, inHandle, &outName]()
+   {
+      if (nullptr != outName)
+         delete []outName;
 
-STDMETHODIMP FileSystem::GetSize(ULONG inHandle, ULONG* outEntitySize)
+      auto name = m_controller->Name(inHandle);
+      memcpy(outName, name.c_str(), sizeof(std::wstring::value_type) * name.size());
+   });
+}
+
+STDMETHODIMP FileSystem::GetSize(ULONG inHandle, ULONG* outEntitySize) const
 {
    return CatchAll([this, inHandle, outEntitySize]()
    {
@@ -153,10 +181,13 @@ STDMETHODIMP FileSystem::GetSize(ULONG inHandle, ULONG* outEntitySize)
    });
 }
 
-STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuffer)
+STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuffer) const
 {
    return CatchAll([this, inHandle, Count, &outBuffer]()
    {
+      if (0u == Count)
+         return;
+
       if (nullptr == outBuffer)
          throw InterfaceError(E_INVALIDARG);
 

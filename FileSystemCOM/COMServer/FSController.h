@@ -21,19 +21,26 @@ namespace NFileSystem
 
       using EntityHandle = uint32_t;
       
-      bool Exists(const Path& path);
+      EntityHandle Root() const;
 
-      EntityHandle Create(const Path& path, Entity::Category category);
+      EntityHandle Create(EntityHandle location, const std::wstring& name, EntityCategory category);
       void Delete(EntityHandle handle);
 
-      std::list<std::wstring> List(EntityHandle handle);
+      bool Exists(EntityHandle location, const std::wstring& name) const;
+      std::list<std::wstring> List(EntityHandle handle) const;
 
-      uint64_t Size(EntityHandle handle);
+      std::wstring Name(EntityHandle handle) const;
+      uint64_t Size(EntityHandle handle) const;
 
-      ManagedArray Read(EntityHandle handle, uint64_t count);
+      ManagedArray Read(EntityHandle handle, uint64_t count) const;
       void Write(EntityHandle handle, const uint8_t* buffer, uint64_t count);
 
    private:
+      OptionalShared<Directory> ExistingDir(EntityHandle handle) const;
+      OptionalShared<Entity> ExistingEntity(EntityHandle handle) const;
+      void CleanUp();
+
+      std::shared_ptr<Directory> m_root;
       std::unordered_map<EntityHandle, std::weak_ptr<Entity>> m_contents;
    };
 } // namespace NFileSystem
