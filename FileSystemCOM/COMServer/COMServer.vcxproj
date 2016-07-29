@@ -55,44 +55,48 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="Macroses.Win32.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="Macroses.x64.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="Macroses.Win32.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="Macroses.x64.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>..\Bin\$(Configuration)\</OutDir>
     <IntDir>.\Obj\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ThirdPartyLibsDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(ThirdPartyLibsDir)\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ThirdPartyLibsDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(ThirdPartyLibsDir)\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>..\Bin\$(Configuration)\</OutDir>
     <IntDir>.\Obj\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ThirdPartyLibsDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(ThirdPartyLibsDir)\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ThirdPartyLibsDir);$(IncludePath)</IncludePath>
-    <LibraryPath>$(ThirdPartyLibsDir)\stage\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -131,13 +135,13 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libboost_system-vc140-mt-1_61.lib;boost_iostreams-vc140-mt-1_61.lib;libboost_filesystem-vc140-mt-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <StringPooling>true</StringPooling>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -176,13 +180,13 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libboost_system-vc140-mt-1_61.lib;boost_iostreams-vc140-mt-1_61.lib;libboost_filesystem-vc140-mt-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <Optimization>Disabled</Optimization>
@@ -230,7 +234,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libboost_system-vc140-mt-sgd-1_61.lib;libboost_filesystem-vc140-mt-sgd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libboost_system-vc140-mt-gd-1_61.lib;boost_iostreams-vc140-mt-gd-1_61.lib;libboost_filesystem-vc140-mt-gd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -239,7 +243,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <Optimization>Disabled</Optimization>
@@ -285,7 +289,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libboost_system-vc140-mt-sgd-1_61.lib;libboost_filesystem-vc140-mt-sgd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;libboost_system-vc140-mt-gd-1_61.lib;boost_iostreams-vc140-mt-gd-1_61.lib;libboost_filesystem-vc140-mt-gd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>C:\Users\krasnuha\Boost\boost_1_61_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>

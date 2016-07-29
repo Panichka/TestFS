@@ -1,4 +1,5 @@
 #include <boost/filesystem.hpp>
+#include <boost/iostreams/device/mapped_file.hpp>
 
 #include "FSController.h"
 #include "FSExceptions.h"
@@ -67,9 +68,11 @@ namespace NFileSystem
       }
    }
 
-   void Controller::CleanUp()
+   void Controller::CleanUp(Controller::EntityHandle from)
    {
-      for (auto it = m_contents.begin(); it != m_contents.end();)
+      auto it = m_contents.find(from);
+
+      for (;it != m_contents.end();)
       {
          if (it->second.expired())
             it = m_contents.erase(it);

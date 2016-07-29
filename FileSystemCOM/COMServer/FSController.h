@@ -3,10 +3,10 @@
 
 #include <list>
 #include <memory>
+#include <map>
 #include <boost/filesystem/path.hpp>
 
 #include "FSEntity.h"
-#include <set>
 
 namespace NFileSystem
 {
@@ -38,10 +38,10 @@ namespace NFileSystem
    private:
       OptionalShared<Directory> ExistingDir(EntityHandle handle) const;
       OptionalShared<Entity> ExistingEntity(EntityHandle handle) const;
-      void CleanUp();
+      void CleanUp(Controller::EntityHandle from = 0u);
 
       std::shared_ptr<Directory> m_root;
-      std::unordered_map<EntityHandle, std::weak_ptr<Entity>> m_contents;
+      std::map<EntityHandle, std::weak_ptr<Entity>> m_contents;
    };
 } // namespace NFileSystem
 
