@@ -35,10 +35,14 @@ namespace NFileSystem
       ManagedArray Read(EntityHandle handle, uint64_t count) const;
       void Write(EntityHandle handle, const uint8_t* buffer, uint64_t count);
 
+      struct FSInfoStorage;
+
    private:
       OptionalShared<Directory> ExistingDir(EntityHandle handle) const;
       OptionalShared<Entity> ExistingEntity(EntityHandle handle) const;
       void CleanUp(Controller::EntityHandle from = 0u);
+
+      std::unique_ptr<FSInfoStorage> m_infoStrage;
 
       std::shared_ptr<Directory> m_root;
       std::map<EntityHandle, std::weak_ptr<Entity>> m_contents;

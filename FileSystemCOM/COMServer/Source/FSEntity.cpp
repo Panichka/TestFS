@@ -6,6 +6,11 @@
 
 namespace NFileSystem
 {
+   void Entity::Parent(std::weak_ptr<Directory> parent)
+   {
+      m_parent = parent;
+   }
+
    std::weak_ptr<Directory> Entity::Parent()
    {
       return m_parent;
@@ -16,13 +21,14 @@ namespace NFileSystem
       return m_parent;
    }
 
-   File::File(uint64_t offset)
-      : Entity(EntityCategory::File)
+   File::File(uint64_t offset, uint64_t size, std::shared_ptr<Directory> parent)
+      : Entity(EntityCategory::File, parent)
+      , m_size(size)
       , m_offset(offset)
    {}
 
    File::File(const File& src)
-      : Entity(EntityCategory::File)
+      : Entity(EntityCategory::File, nullptr)
       , m_size(src.m_size)
       , m_offset(src.m_offset)
    {}
@@ -34,17 +40,17 @@ namespace NFileSystem
       return *this;
    }
 
-   Directory::Directory()
-      : Entity(EntityCategory::Directory)
+   Directory::Directory(std::shared_ptr<Directory> parent)
+      : Entity(EntityCategory::Directory, parent)
    {}
 
    Directory::Directory(const Directory& src)
-      : Entity(EntityCategory::Directory)
+      : Entity(EntityCategory::Directory, nullptr)
       , m_contents(src.m_contents)
    {}
 
    Directory::Directory(Directory&& src)
-      : Entity(EntityCategory::Directory)
+      : Entity(EntityCategory::Directory, nullptr)
       , m_contents(std::move(src.m_contents))
    {
       src.m_contents.clear();
@@ -61,6 +67,11 @@ namespace NFileSystem
    {
       m_contents = src.m_contents;
       return *this;
+   }
+
+   uint64_t Directory::Count() const
+   {
+      return m_contents.size();
    }
 
    uint64_t Directory::Size() const
@@ -132,5 +143,15 @@ namespace NFileSystem
          return boost::make_optional(it->first);
 
       return boost::none;      
+   }
+
+   Directory::Contents::const_iterator Directory::begin() const
+   {
+      return m_contents.begin();
+   }
+
+   Directory::Contents::const_iterator Directory::end() const
+   {
+      return m_contents.end();
    }
 } // namespace NFileSystem

@@ -2,14 +2,14 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <BoostIncludeDir>C:\Users\Panichka\boost_1_61_0</BoostIncludeDir>
-    <BoostLibsDir>C:\Users\Panichka\boost_1_61_0\stage\lib</BoostLibsDir>
+    <BoostRootDir>C:\Users\Panichka\boost_1_61_0</BoostRootDir>
+    <BoostLibsDir>$(BoostRootDir)\stage\lib</BoostLibsDir>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />
   <ItemGroup>
-    <BuildMacro Include="BoostIncludeDir">
-      <Value>$(BoostIncludeDir)</Value>
+    <BuildMacro Include="BoostRootDir">
+      <Value>$(BoostRootDir)</Value>
       <EnvironmentVariable>true</EnvironmentVariable>
     </BuildMacro>
     <BuildMacro Include="BoostLibsDir">

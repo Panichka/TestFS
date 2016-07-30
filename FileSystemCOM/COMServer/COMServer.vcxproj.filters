@@ -13,69 +13,69 @@
       <UniqueIdentifier>{432bb29a-4d49-4ef3-a077-fd7e61afea31}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
-    <Filter Include="FileSystemImpl">
-      <UniqueIdentifier>{6922c6b5-0ec9-4dc8-b4f8-23f960c7761f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\FileSystemImpl">
       <UniqueIdentifier>{17c53775-9396-4a5f-a16c-5a9d313c271f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\FileSystemImpl">
+      <UniqueIdentifier>{6922c6b5-0ec9-4dc8-b4f8-23f960c7761f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClassFactory.cpp">
+    <ClCompile Include="Source/ClassFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="COMServer.cpp">
+    <ClCompile Include="Source/COMServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FSCoClass.cpp">
+    <ClCompile Include="Source/FSCoClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registrar.cpp">
+    <ClCompile Include="Source/Registrar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ReferenceCounter.cpp">
+    <ClCompile Include="Source/ReferenceCounter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FSController.cpp">
+    <ClCompile Include="Source/FSController.cpp">
       <Filter>Source Files\FileSystemImpl</Filter>
     </ClCompile>
-    <ClCompile Include="FSEntity.cpp">
+    <ClCompile Include="Source/FSEntity.cpp">
       <Filter>Source Files\FileSystemImpl</Filter>
     </ClCompile>
-    <ClCompile Include="FSExceptions.cpp">
+    <ClCompile Include="Source/FSExceptions.cpp">
       <Filter>Source Files\FileSystemImpl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClassFactory.h">
+    <ClInclude Include="Include/ClassFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="COMServer.h">
+    <ClInclude Include="Include/COMServer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registrar.h">
+    <ClInclude Include="Include/Registrar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GUIDs.h">
+    <ClInclude Include="Include/GUIDs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FSCoClass.h">
+    <ClInclude Include="Include/FSCoClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ReferenceCounter.h">
+    <ClInclude Include="Include/ReferenceCounter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FSInterface.h">
+    <ClInclude Include="Include/FSInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FSExceptions.h">
-      <Filter>FileSystemImpl</Filter>
+    <ClInclude Include="Include/FSExceptions.h">
+      <Filter>Header Files\FileSystemImpl</Filter>
     </ClInclude>
-    <ClInclude Include="FSController.h">
-      <Filter>FileSystemImpl</Filter>
+    <ClInclude Include="Include/FSController.h">
+      <Filter>Header Files\FileSystemImpl</Filter>
     </ClInclude>
-    <ClInclude Include="FSEntity.h">
-      <Filter>FileSystemImpl</Filter>
+    <ClInclude Include="Include/FSEntity.h">
+      <Filter>Header Files\FileSystemImpl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

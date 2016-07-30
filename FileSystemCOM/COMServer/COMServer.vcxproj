@@ -71,27 +71,31 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\Bin\$(Configuration)\</OutDir>
-    <IntDir>.\Obj\$(Configuration)\</IntDir>
+    <OutDir>..\Bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>.\Obj\$(Configuration)\$(Platform)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <IncludePath>./Include;$(BoostRootDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\Bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>.\Obj\$(Configuration)\$(Platform)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <IncludePath>./Include;$(BoostRootDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\Bin\$(Configuration)\</OutDir>
-    <IntDir>.\Obj\$(Configuration)\</IntDir>
+    <OutDir>..\Bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>.\Obj\$(Configuration)\$(Platform)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <IncludePath>./Include;$(BoostRootDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\Bin\$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>.\Obj\$(Configuration)\$(Platform)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(BoostIncludeDir);$(IncludePath)</IncludePath>
+    <IncludePath>./Include;$(BoostRootDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -105,9 +109,7 @@
       <WarningLevel>EnableAllWarnings</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;COMServer_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Release\COMServer.pch</PrecompiledHeaderOutputFile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -150,9 +152,7 @@
       <WarningLevel>EnableAllWarnings</WarningLevel>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;COMServer_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\Release\COMServer.pch</PrecompiledHeaderOutputFile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -196,11 +196,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;COMServer_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>
-      </PrecompiledHeaderOutputFile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -252,11 +248,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;COMServer_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>
-      </PrecompiledHeaderOutputFile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>
-      </PrecompiledHeaderFile>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -298,14 +290,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="ClassFactory.cpp" />
-    <ClCompile Include="FSCoClass.cpp" />
-    <ClCompile Include="COMServer.cpp" />
-    <ClCompile Include="FSController.cpp" />
-    <ClCompile Include="FSEntity.cpp" />
-    <ClCompile Include="FSExceptions.cpp" />
-    <ClCompile Include="ReferenceCounter.cpp" />
-    <ClCompile Include="Registrar.cpp" />
+    <ClCompile Include="Source/ClassFactory.cpp" />
+    <ClCompile Include="Source/FSCoClass.cpp" />
+    <ClCompile Include="Source/COMServer.cpp" />
+    <ClCompile Include="Source/FSController.cpp" />
+    <ClCompile Include="Source/FSEntity.cpp" />
+    <ClCompile Include="Source/FSExceptions.cpp" />
+    <ClCompile Include="Source/ReferenceCounter.cpp" />
+    <ClCompile Include="Source/Registrar.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="COMServer.def" />
@@ -314,16 +306,16 @@
     <Midl Include="COMServer.idl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClassFactory.h" />
-    <ClInclude Include="FSController.h" />
-    <ClInclude Include="FSEntity.h" />
-    <ClInclude Include="FSExceptions.h" />
-    <ClInclude Include="GUIDs.h" />
-    <ClInclude Include="FSInterface.h" />
-    <ClInclude Include="FSCoClass.h" />
-    <ClInclude Include="COMServer.h" />
-    <ClInclude Include="ReferenceCounter.h" />
-    <ClInclude Include="Registrar.h" />
+    <ClInclude Include="Include/ClassFactory.h" />
+    <ClInclude Include="Include/FSController.h" />
+    <ClInclude Include="Include/FSEntity.h" />
+    <ClInclude Include="Include/FSExceptions.h" />
+    <ClInclude Include="Include/GUIDs.h" />
+    <ClInclude Include="Include/FSInterface.h" />
+    <ClInclude Include="Include/FSCoClass.h" />
+    <ClInclude Include="Include/COMServer.h" />
+    <ClInclude Include="Include/ReferenceCounter.h" />
+    <ClInclude Include="Include/Registrar.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
