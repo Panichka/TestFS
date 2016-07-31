@@ -8,6 +8,11 @@
 
 #include "FSEntity.h"
 
+namespace boost
+{
+   class shared_mutex;
+}
+
 namespace NFileSystem
 {
    using Path = boost::filesystem::path;
@@ -52,6 +57,7 @@ namespace NFileSystem
 
       void CleanUp(Controller::EntityHandle from = 0u);
 
+      std::unique_ptr<boost::shared_mutex> m_mutex;
       std::unique_ptr<FSInfoStorage> m_infoStrage;
 
       std::shared_ptr<Directory> m_root;
