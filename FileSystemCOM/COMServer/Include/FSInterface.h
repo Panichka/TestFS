@@ -15,8 +15,8 @@ struct IFileSystem : IUnknown
    STDMETHOD(GetName)(ULONG inHandle, LPOLESTR outName) const = 0;
 	STDMETHOD(GetSize)(ULONG inHandle, ULONG* outEntitySize) const = 0;
 
-	STDMETHOD(Read)(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuffer) const = 0;
-	STDMETHOD(Write)(ULONG inHandle, BYTE_SIZEDARR inBuffer) = 0;
+	STDMETHOD(Read)(ULONG inHandle, ULONG inCount, ULONG inFromPosition, BYTE_SIZEDARR* outBuffer) const = 0;
+	STDMETHOD(Write)(ULONG inHandle, ULONG inToPosition, BYTE_SIZEDARR inBuffer) = 0;
 };
 
 #endif // __vfs__FSInterface_h__

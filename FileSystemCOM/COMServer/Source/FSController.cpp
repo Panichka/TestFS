@@ -20,7 +20,7 @@ namespace NFileSystem
       }
 
       void LoadFSInfo(Controller& owner);
-      void SaveFSInfo(const Controller& owner) const;
+      void SaveFSInfo(const Controller& owner);
 
       uint64_t InfoBlockSize = 0u;
       uint64_t DataBlockSize = 0u;
@@ -128,6 +128,43 @@ namespace NFileSystem
          boost::filesystem::resize_file(Controller::FSInfoStorage::PhysicalFileName(), newSize);
       }
 
+      void ReplaceData(uint64_t replaceFrom, uint64_t replaceTo, uint64_t dataSize)
+      {
+         auto fileSize = boost::filesystem::file_size(Controller::FSInfoStorage::PhysicalFileName());
+         if(fileSize < replaceTo + dataSize)
+            ResizeFile(replaceTo + dataSize);
+
+         auto fromOffset = AlignedOffset(replaceFrom);
+         auto toOffset = AlignedOffset(replaceTo);
+         
+         auto Replace = [&fromOffset, &toOffset](uint64_t portion = 0)
+         {
+            boost::iostreams::mapped_file_source from(
+               Controller::FSInfoStorage::PhysicalFileName(),
+               portion,
+               fromOffset);
+
+            boost::iostreams::mapped_file_sink to(
+               Controller::FSInfoStorage::PhysicalFileName(),
+               portion,
+               toOffset);
+
+            memcpy_s(to.data(), to.size(), from.data(), from.size());
+         };
+
+         auto enougth = AlignedOffset(replaceTo + dataSize);
+         auto portionSize = boost::iostreams::mapped_file::alignment();
+
+         while (fromOffset < enougth)
+         {
+            Replace(portionSize);
+            fromOffset += portionSize;
+            toOffset += portionSize;
+         }
+
+         Replace();
+      }
+
       void EnlargeFile(uint64_t oldSize, uint64_t newSize, uint64_t copyFromPos)
       {
          assert(copyFromPos < oldSize && oldSize < newSize);
@@ -169,7 +206,7 @@ namespace NFileSystem
       }
    }
 
-   void Controller::FSInfoStorage::SaveFSInfo(const Controller& owner) const
+   void Controller::FSInfoStorage::SaveFSInfo(const Controller& owner)
    {
       boost::iostreams::mapped_file_sink file;
       auto infoBlockMaxSize =
@@ -181,15 +218,16 @@ namespace NFileSystem
       try
       {
          auto fileSize = boost::filesystem::file_size(PhysicalFileName());
-         if (fileSize < infoBlockMaxSize)
+         if (InfoBlockSize < infoBlockMaxSize)
             EnlargeFile(fileSize, totalMaxSize, DataBlockPos);
 
          file.open(PhysicalFileName(), infoBlockMaxSize);
 
          auto fileData = file.data();
+         auto shiftData = totalMaxSize - fileSize;
 
          std::function<void(std::shared_ptr<Directory>)> deserialize =
-            [&fileData, &deserialize](std::shared_ptr<Directory> dir) -> void
+            [&fileData, &deserialize, shiftData](std::shared_ptr<Directory> dir) -> void
          {
             *reinterpret_cast<uint64_t*>(fileData) = dir->Count();
             fileData += sizeof(uint64_t);
@@ -208,7 +246,7 @@ namespace NFileSystem
                   auto& entity = *static_cast<const File*>(item.second.get());
                   *reinterpret_cast<uint64_t*>(fileData) = entity.Size();
                   fileData += sizeof(uint64_t);
-                  *reinterpret_cast<uint64_t*>(fileData) = entity.Offset();
+                  *reinterpret_cast<uint64_t*>(fileData) = entity.Offset() + shiftData;
                   fileData += sizeof(uint64_t);
                }
                else if (EntityCategory::Directory == item.second->Category)
@@ -224,16 +262,14 @@ namespace NFileSystem
 
          deserialize(owner.m_root);
 
-         uint64_t totalCount = fileData - file.data();
+         InfoBlockSize = fileData - file.data();
+
          fileData = file.data();
-         *reinterpret_cast<decltype(totalCount)*>(fileData) = totalCount;
-         fileData += sizeof(totalCount);
+         *reinterpret_cast<decltype(InfoBlockSize)*>(fileData) = InfoBlockSize;
+         fileData += sizeof(InfoBlockSize);
          *reinterpret_cast<decltype(DataBlockSize)*>(fileData) = DataBlockSize;
          fileData += sizeof(DataBlockSize);
          *reinterpret_cast<decltype(DataBlockPos)*>(fileData) = DataBlockPos;
-
-         file.close();
-         ResizeFile(totalCount);
       }
       catch (...)
       {
@@ -304,20 +340,6 @@ namespace NFileSystem
          
          return optEntity;
       }
-
-      OptionalShared<const Entity> RecursiveFind(const boost::filesystem::path& path, const Directory& dir)
-      {
-         return path.empty() ? boost::none : Find(path.begin(), path.end(), dir);
-      }
-
-      OptionalShared<Entity> RecursiveFind(const boost::filesystem::path& path, Directory& dir)
-      {
-         auto constResult = RecursiveFind(path, const_cast<const Directory&>(dir));
-         if (constResult)
-            return boost::make_optional(std::const_pointer_cast<Entity>(constResult.get()));
-
-         return boost::none;
-      }
    }
 
    void Controller::CleanUp(Controller::EntityHandle from)
@@ -346,15 +368,6 @@ namespace NFileSystem
       return boost::make_optional(entity);
    }
 
-   OptionalShared<Directory> Controller::ExistingDir(Controller::EntityHandle handle) const
-   {
-      auto entity = ExistingEntity(handle);
-      if (!entity || EntityCategory::Directory != entity.value()->Category)
-         return boost::none;
-
-      return boost::make_optional(std::static_pointer_cast<Directory>(entity.value()));
-   }
-
    Controller::EntityHandle Controller::Root() const
    {
       return rootHandle;
@@ -362,7 +375,7 @@ namespace NFileSystem
 
    Controller::EntityHandle Controller::Create(EntityHandle location, const std::wstring& name, EntityCategory category)
    {
-      auto optDir = ExistingDir(location);
+      auto optDir = ExistingEntity<Directory>(location);
       if (!optDir)
          throw Exception(ErrorCode::DoesNotExists);
 
@@ -400,7 +413,7 @@ namespace NFileSystem
 
    bool Controller::Exists(EntityHandle location, const std::wstring& name) const
    {
-      auto optDir = ExistingDir(location);
+      auto optDir = ExistingEntity<Directory>(location);
       if (!optDir)
          return false;
 
@@ -409,7 +422,7 @@ namespace NFileSystem
 
    std::list<std::wstring> Controller::List(Controller::EntityHandle handle) const
    {
-      auto optDir = ExistingDir(handle);
+      auto optDir = ExistingEntity<Directory>(handle);
       if (!optDir)
          throw Exception(ErrorCode::DoesNotExists);
 
@@ -439,11 +452,78 @@ namespace NFileSystem
       return optEntity.value()->Size();
    }
 
-   ManagedArray Controller::Read(Controller::EntityHandle handle, uint64_t count) const
+   ManagedArray Controller::Read(Controller::EntityHandle handle, uint64_t count, uint64_t position) const
    {
-      return ManagedArray(std::make_pair(nullptr, 0u));
+      auto optFile = ExistingEntity<File>(handle);
+      if (!optFile)
+         throw Exception(ErrorCode::DoesNotExists);
+
+      if (optFile.value()->Size() <= position)
+         throw Exception(ErrorCode::InvalidArgument);
+
+      if (optFile.value()->Size() < count + position)
+         count = optFile.value()->Size() - position;
+
+      boost::iostreams::mapped_file_source src;
+      auto alignedOffset = AlignedOffset(optFile.value()->Offset() + position);
+      auto relativeOffset = RelativeOffset(optFile.value()->Offset() + position);
+
+      auto array = ManagedArray::first_type(new ManagedArray::first_type::element_type[count]);
+
+      try
+      {
+         src.open(
+            FSInfoStorage::PhysicalFileName(),
+            count + relativeOffset,
+            alignedOffset);
+
+         memcpy_s(array.get(), count, src.data() + relativeOffset, src.size());
+      }
+      catch (...)
+      {
+         throw Exception(ErrorCode::InternalError);
+      }
+
+      return ManagedArray(std::make_pair(std::move(array), count));
    }
 
-   void Controller::Write(Controller::EntityHandle handle, const uint8_t* buffer, uint64_t count)
-   {}
+   void Controller::Write(Controller::EntityHandle handle, const uint8_t* buffer, uint64_t count, uint64_t position)
+   {
+      auto optFile = ExistingEntity<File>(handle);
+      if (!optFile)
+         throw Exception(ErrorCode::DoesNotExists);
+
+      if (optFile.value()->Size() <= position)
+         throw Exception(ErrorCode::InvalidArgument);
+
+      if (optFile.value()->Size() < position + count)
+      {
+         auto fileSize = boost::filesystem::file_size(FSInfoStorage::PhysicalFileName());
+         if (0u == position || (optFile.value()->Offset() + optFile.value()->Size() == fileSize))
+            ResizeFile(fileSize + position + count - optFile.value()->Size());
+         else
+            ReplaceData(optFile.value()->Offset(), fileSize, position);
+
+         optFile.value()->Offset(fileSize);
+         optFile.value()->Size(position + count);
+      }
+
+      boost::iostreams::mapped_file_sink dst;
+      auto alignedOffset = AlignedOffset(optFile.value()->Offset() + position);
+      auto relativeOffset = RelativeOffset(optFile.value()->Offset() + position);
+
+      try
+      {
+         dst.open(
+            FSInfoStorage::PhysicalFileName(),
+            count + relativeOffset,
+            alignedOffset);
+
+         memcpy_s(dst.data() + relativeOffset, dst.size(), buffer, count);
+      }
+      catch (...)
+      {
+         throw Exception(ErrorCode::InternalError);
+      }
+   }
 } // namespace NFileSystem

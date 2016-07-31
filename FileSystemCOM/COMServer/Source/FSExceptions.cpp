@@ -37,9 +37,9 @@ namespace NFileSystem
          return msg;
       }
 
-      const std::string& IsLockedMsg()
+      const std::string& InvalidArgumentMsg()
       {
-         static const std::string msg("Entity is locked by another process");
+         static const std::string msg("Invalid argument");
          return msg;
       }
    }
@@ -51,7 +51,7 @@ namespace NFileSystem
       case ErrorCode::InternalError: return InternalErrorMsg();
       case ErrorCode::AlreadyExists: return AlreadyExistsMsg();
       case ErrorCode::DoesNotExists: return DoesNotExistsMsg();
-      case ErrorCode::IsLocked: return IsLockedMsg();
+      case ErrorCode::InvalidArgument: return InvalidArgumentMsg();
       default: return DefaultMsg();
       }
    }

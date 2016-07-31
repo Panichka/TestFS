@@ -32,14 +32,24 @@ namespace NFileSystem
       std::wstring Name(EntityHandle handle) const;
       uint64_t Size(EntityHandle handle) const;
 
-      ManagedArray Read(EntityHandle handle, uint64_t count) const;
-      void Write(EntityHandle handle, const uint8_t* buffer, uint64_t count);
+      ManagedArray Read(EntityHandle handle, uint64_t count, uint64_t position = 0) const;
+      void Write(EntityHandle handle, const uint8_t* buffer, uint64_t count, uint64_t position = 0);
 
       struct FSInfoStorage;
 
    private:
-      OptionalShared<Directory> ExistingDir(EntityHandle handle) const;
       OptionalShared<Entity> ExistingEntity(EntityHandle handle) const;
+
+      template <typename  T>
+      OptionalShared<T> ExistingEntity(EntityHandle handle) const
+      {
+         auto entity = ExistingEntity(handle);
+         if (!entity || typename T::Category() != entity.value()->Category)
+            return boost::none;
+
+         return boost::make_optional(std::static_pointer_cast<T>(entity.value()));
+      }
+
       void CleanUp(Controller::EntityHandle from = 0u);
 
       std::unique_ptr<FSInfoStorage> m_infoStrage;

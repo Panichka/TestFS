@@ -157,6 +157,7 @@ STDMETHODIMP FileSystem::List(ULONG inHandle, SAFEARR_BSTR outEntities) const
       }
    });
 }
+
 STDMETHODIMP FileSystem::GetName(ULONG inHandle, LPOLESTR outName) const
 {
    return CatchAll([this, inHandle, &outName]()
@@ -181,17 +182,17 @@ STDMETHODIMP FileSystem::GetSize(ULONG inHandle, ULONG* outEntitySize) const
    });
 }
 
-STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuffer) const
+STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG inCount, ULONG inFromPosition, BYTE_SIZEDARR* outBuffer) const
 {
-   return CatchAll([this, inHandle, Count, &outBuffer]()
+   return CatchAll([this, inHandle, inCount, inFromPosition, &outBuffer]()
    {
-      if (0u == Count)
+      if (0u == inCount)
          return;
 
       if (nullptr == outBuffer)
          throw InterfaceError(E_INVALIDARG);
 
-      auto readResult = m_controller->Read(inHandle, Count);
+      auto readResult = m_controller->Read(inHandle, inCount, inFromPosition);
       if (!readResult.first)
          throw InterfaceError(E_UNEXPECTED);
       
@@ -201,9 +202,9 @@ STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuf
    });
 }
 
-STDMETHODIMP FileSystem::Write(ULONG inHandle, BYTE_SIZEDARR inBuffer)
+STDMETHODIMP FileSystem::Write(ULONG inHandle, ULONG inToPosition, BYTE_SIZEDARR inBuffer)
 {
-   return CatchAll([this, inHandle, &inBuffer]()
+   return CatchAll([this, inHandle, inToPosition, &inBuffer]()
    {
       if (0u == inBuffer.clSize)
          return;
@@ -211,6 +212,6 @@ STDMETHODIMP FileSystem::Write(ULONG inHandle, BYTE_SIZEDARR inBuffer)
       if (nullptr == inBuffer.pData)
          throw InterfaceError(E_INVALIDARG);
 
-      m_controller->Write(inHandle, inBuffer.pData, inBuffer.clSize);
+      m_controller->Write(inHandle, inBuffer.pData, inBuffer.clSize, inToPosition);
    });
 }

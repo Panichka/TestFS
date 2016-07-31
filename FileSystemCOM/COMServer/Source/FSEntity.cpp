@@ -22,13 +22,13 @@ namespace NFileSystem
    }
 
    File::File(uint64_t offset, uint64_t size, std::shared_ptr<Directory> parent)
-      : Entity(EntityCategory::File, parent)
+      : Entity(Category(), parent)
       , m_size(size)
       , m_offset(offset)
    {}
 
    File::File(const File& src)
-      : Entity(EntityCategory::File, nullptr)
+      : Entity(Category(), nullptr)
       , m_size(src.m_size)
       , m_offset(src.m_offset)
    {}
@@ -41,16 +41,16 @@ namespace NFileSystem
    }
 
    Directory::Directory(std::shared_ptr<Directory> parent)
-      : Entity(EntityCategory::Directory, parent)
+      : Entity(Category(), parent)
    {}
 
    Directory::Directory(const Directory& src)
-      : Entity(EntityCategory::Directory, nullptr)
+      : Entity(Category(), nullptr)
       , m_contents(src.m_contents)
    {}
 
    Directory::Directory(Directory&& src)
-      : Entity(EntityCategory::Directory, nullptr)
+      : Entity(Category(), nullptr)
       , m_contents(std::move(src.m_contents))
    {
       src.m_contents.clear();

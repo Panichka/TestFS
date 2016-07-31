@@ -34,8 +34,8 @@ public:
    STDMETHOD(GetName)(ULONG inHandle, LPOLESTR outName) const override;
    STDMETHOD(GetSize)(ULONG inHandle, ULONG* outEntitySize) const override;
 
-   STDMETHOD(Read)(ULONG inHandle, ULONG Count, BYTE_SIZEDARR* outBuffer) const override;
-   STDMETHOD(Write)(ULONG inHandle, BYTE_SIZEDARR inBuffer) override;
+   STDMETHOD(Read)(ULONG inHandle, ULONG inCount, ULONG inFromPosition, BYTE_SIZEDARR* outBuffer) const override;
+   STDMETHOD(Write)(ULONG inHandle, ULONG inToPosition, BYTE_SIZEDARR inBuffer) override;
 
 private:
    NCOMServer::ReferenceCounter m_refCounter;

@@ -6,7 +6,7 @@
 namespace NFileSystem
 {
    enum class ErrorCode : uint8_t
-   { InternalError, AlreadyExists, DoesNotExists, IsLocked};
+   { InternalError, AlreadyExists, DoesNotExists, InvalidArgument};
 
    class Exception : public std::exception
    {

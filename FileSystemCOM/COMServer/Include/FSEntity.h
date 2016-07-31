@@ -47,6 +47,8 @@ namespace NFileSystem
       uint64_t Offset() const { return m_offset; }
       void Offset(uint64_t offset) { m_offset = offset; }
 
+      static EntityCategory Category() { return EntityCategory::File; }
+
    private:
       uint64_t m_size = 0u;
       uint64_t m_offset = 0ull;
@@ -81,6 +83,8 @@ namespace NFileSystem
       using Contents = std::unordered_map<std::wstring, std::shared_ptr<Entity>>;
       Contents::const_iterator begin() const;
       Contents::const_iterator end() const;
+
+      static EntityCategory Category() { return EntityCategory::Directory; }
 
    private:
       Contents m_contents;
