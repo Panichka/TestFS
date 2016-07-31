@@ -1,91 +1,61 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{b6d826ab-d124-4efe-b73e-9c617abf81b7}</UniqueIdentifier>
-      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{639fc7b1-a6f7-4690-8724-00aea1c12f78}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{432bb29a-4d49-4ef3-a077-fd7e61afea31}</UniqueIdentifier>
-      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
-    <Filter Include="Source Files\FileSystemImpl">
-      <UniqueIdentifier>{17c53775-9396-4a5f-a16c-5a9d313c271f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\FileSystemImpl">
-      <UniqueIdentifier>{6922c6b5-0ec9-4dc8-b4f8-23f960c7761f}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Source/ClassFactory.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Source/COMServer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Source/FSCoClass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source/Registrar.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Source/ReferenceCounter.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="Source/FSController.cpp">
-      <Filter>Source Files\FileSystemImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="Source/FSEntity.cpp">
-      <Filter>Source Files\FileSystemImpl</Filter>
-    </ClCompile>
-    <ClCompile Include="Source/FSExceptions.cpp">
-      <Filter>Source Files\FileSystemImpl</Filter>
+    <ClCompile Include="Source/Registrar.cpp">
+      <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include/ClassFactory.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Include/COMServer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include/Registrar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include/GUIDs.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Include/FSCoClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include/ReferenceCounter.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
     <ClInclude Include="Include/FSInterface.h">
-      <Filter>Header Files</Filter>
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Include/FSExceptions.h">
-      <Filter>Header Files\FileSystemImpl</Filter>
+    <ClInclude Include="Include/GUIDs.h">
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Include/FSController.h">
-      <Filter>Header Files\FileSystemImpl</Filter>
+    <ClInclude Include="Include/ReferenceCounter.h">
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="Include/FSEntity.h">
-      <Filter>Header Files\FileSystemImpl</Filter>
+    <ClInclude Include="Include/Registrar.h">
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{785d7d54-624a-414d-bdcf-4cb31f45ffd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{065cee5c-b5cb-4f0c-bc93-fd0d16333880}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
     <CustomBuild Include="COMServer.def">
-      <Filter>Source Files</Filter>
+      <Filter>Sources</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="COMServer.idl">
-      <Filter>Source Files</Filter>
+      <Filter>Sources</Filter>
     </Midl>
   </ItemGroup>
 </Project>

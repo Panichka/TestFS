@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Source/FSController.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source/FSEntity.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Source/FSExceptions.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Include/FSExceptions.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include/FSEntity.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Include/FSController.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{69890ffa-f1d4-44c2-95bf-bbba6bf0465b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{d31b972a-b879-4a8c-8829-1caa0eb42a9b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
