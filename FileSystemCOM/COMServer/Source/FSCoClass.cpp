@@ -95,7 +95,7 @@ STDMETHODIMP FileSystem::Root(ULONG* outRootHandle) const
    });
 }
 
-STDMETHODIMP FileSystem::CreateFile(ULONG inLocationHandle, LPOLESTR inName, ULONG* outCreatedHandle)
+STDMETHODIMP FileSystem::CreateFile(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outCreatedHandle)
 {
    return CatchAll([this, inLocationHandle, inName, outCreatedHandle]()
    {
@@ -107,7 +107,7 @@ STDMETHODIMP FileSystem::CreateFile(ULONG inLocationHandle, LPOLESTR inName, ULO
    });
 }
 
-STDMETHODIMP FileSystem::CreateDirectory(ULONG inLocationHandle, LPOLESTR inName, ULONG* outCreatedHandle)
+STDMETHODIMP FileSystem::CreateDirectory(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outCreatedHandle)
 {
    return CatchAll([this, inLocationHandle, inName, &outCreatedHandle]()
    {
@@ -127,7 +127,7 @@ STDMETHODIMP FileSystem::Delete(ULONG inHandle)
    });
 }
 
-STDMETHODIMP FileSystem::Exists(ULONG inLocationHandle, LPOLESTR inName, BOOL* outResult) const
+STDMETHODIMP FileSystem::Exists(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const
 {
    return CatchAll([this, inLocationHandle, inName, outResult]()
    {

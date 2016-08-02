@@ -5,11 +5,11 @@ struct IFileSystem : IUnknown
 {
    STDMETHOD(Root)(ULONG* outRootHandle) const = 0;
 
-	STDMETHOD(CreateFile)(ULONG inLocationHandle, LPOLESTR inName, ULONG* outCreatedHandle) = 0;
-   STDMETHOD(CreateDirectory)(ULONG inLocationHandle, LPOLESTR inName, ULONG* outCreatedHandle) = 0;
+	STDMETHOD(CreateFile)(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outCreatedHandle) = 0;
+   STDMETHOD(CreateDirectory)(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outCreatedHandle) = 0;
 	STDMETHOD(Delete)(ULONG inHandle) = 0;
 
-	STDMETHOD(Exists)(ULONG inLocationHandle, LPOLESTR inName, BOOL* outResult) const = 0;
+	STDMETHOD(Exists)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const = 0;
 	STDMETHOD(List)(ULONG inHandle, SAFEARR_BSTR outEntities) const = 0;
 
    STDMETHOD(GetName)(ULONG inHandle, LPOLESTR outName) const = 0;
