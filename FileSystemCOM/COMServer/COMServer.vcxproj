@@ -137,7 +137,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;filesystemlib.lib;libboost_system-vc140-mt-1_61.lib;boost_iostreams-vc140-mt-1_61.lib;libboost_filesystem-vc140-mt-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;filesystemlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)FileSystemLib/Lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -181,7 +181,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;filesystemlib.lib;libboost_system-vc140-mt-1_61.lib;boost_iostreams-vc140-mt-1_61.lib;libboost_filesystem-vc140-mt-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;filesystemlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)FileSystemLib/Lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
@@ -232,7 +232,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;filesystemlib.lib;libboost_system-vc140-mt-gd-1_61.lib;boost_iostreams-vc140-mt-gd-1_61.lib;libboost_filesystem-vc140-mt-gd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;filesystemlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)FileSystemLib/Lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -283,7 +283,7 @@
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <ImportLibrary>$(OutDir)$(ProjectName).lib</ImportLibrary>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;filesystemlib.lib;libboost_system-vc140-mt-gd-1_61.lib;boost_iostreams-vc140-mt-gd-1_61.lib;libboost_filesystem-vc140-mt-gd-1_61.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;filesystemlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)FileSystemLib/Lib/$(Configuration)/$(Platform);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
