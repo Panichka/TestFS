@@ -77,8 +77,17 @@ IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown *pUnkOuter, REFIID riid, vo
    {
       result = E_OUTOFMEMORY;
 
-      auto fsObj = new FileSystem();
-      if (nullptr == fsObj)
+      FileSystem* fsObj = nullptr;
+      try
+      {
+         fsObj = new FileSystem();
+      }
+      catch (...)
+      {
+         return E_FAIL;
+      }
+
+      if (nullptr != fsObj)
       {
          result = fsObj->QueryInterface(riid, ppv);
          fsObj->Release();

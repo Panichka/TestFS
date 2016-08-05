@@ -48,13 +48,13 @@ STDAPI DllRegisterServer(void)
 {
 	char path [MAX_PATH];
 	GetModuleFileName(static_cast<HMODULE>(dllModuleHandle), path, MAX_PATH);
-	return NCOMServer::RegisterObject(CLSID_FS, "VirtualFileSystemLib", "VirtualFileSystemObj", path) ?
+	return NCOMServer::RegisterObject(CLSID_FS, "VirtualFileSystemLib", "VFSObject", path) ?
       S_OK : S_FALSE;
 }
 
 STDAPI DllUnregisterServer(void)
 {
-	return NCOMServer::UnRegisterObject(CLSID_FS, "VirtualFileSystemLib", "VirtualFileSystemObj") ?
+	return NCOMServer::UnRegisterObject(CLSID_FS, "VirtualFileSystemLib", "VFSObject") ?
       S_OK : S_FALSE;
 }
 

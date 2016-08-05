@@ -8,21 +8,39 @@
 #include "FSCoClass.h"
 #include "FSController.h"
 #include "FSExceptions.h"
+#include <boost/optional.hpp>
 
 FileSystem::FileSystem()
-   : m_controller(std::make_unique<NFileSystem::Controller>())
+   : m_refCounter(1u)
+   , m_controller(std::make_unique<NFileSystem::Controller>())
 {}
+
+template <typename Interface>
+boost::optional<Interface*> getInterface(FileSystem& object, REFIID iid, REFIID riid)
+{
+   if (IsEqualIID(iid, riid))
+      return static_cast<Interface *>(&object);
+
+   return boost::none;
+}
 
 STDMETHODIMP FileSystem::QueryInterface(REFIID riid, LPVOID *ppv)
 {
-	*ppv = nullptr;
-	if(IsEqualIID(riid, IID_IUnknown) || IsEqualIID(riid, IID_FS))
-	{
-		*ppv = static_cast<IFileSystem*>(this);
-		AddRef();
-		return S_OK;
-	}
-	return E_NOINTERFACE;
+   if (nullptr == ppv || nullptr != *ppv)
+      return E_INVALIDARG;
+
+   boost::optional<void*> result;
+   if (
+      (result = getInterface<IUnknown>(*this, IID_IUnknown, riid)) ||
+      (result = getInterface<IFileSystem>(*this, IID_FS, riid))
+      )
+   {
+      *ppv = result.get();
+      AddRef();
+      return S_OK;
+   }
+
+   return E_NOINTERFACE;
 }
 
 STDMETHODIMP_(ULONG) FileSystem::AddRef()

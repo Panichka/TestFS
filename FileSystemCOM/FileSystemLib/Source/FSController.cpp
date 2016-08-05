@@ -299,7 +299,8 @@ namespace NFileSystem
          if (!fs::is_regular_file(FSInfoStorage::PhysicalFileName()))
             throw Exception(ErrorCode::InternalError);
 
-         m_infoStrage->LoadFSInfo(*this);
+         if (!fs::is_empty(FSInfoStorage::PhysicalFileName()))
+            m_infoStrage->LoadFSInfo(*this);
       }
    }
 
@@ -318,7 +319,8 @@ namespace NFileSystem
 
       try
       {
-         m_infoStrage->SaveFSInfo(*this);
+         if (m_contents.size() > 1u) //something besides root
+            m_infoStrage->SaveFSInfo(*this);
       }
       catch(...)
       {
