@@ -13,7 +13,7 @@ namespace NFileSystem
 
    struct Entity
    {
-      virtual uint64_t Size() const = 0;
+      virtual size_t Size() const = 0;
       virtual ~Entity() = default;
 
       const EntityCategory Category;
@@ -37,21 +37,21 @@ namespace NFileSystem
 
    struct File : Entity
    {
-      explicit File(uint64_t offset = 0ull, uint64_t size = 0ull, std::shared_ptr<Directory> parent = nullptr);
+      explicit File(size_t offset = 0ull, size_t size = 0ull, std::shared_ptr<Directory> parent = nullptr);
       File(const File& src); 
       File& operator=(const File& src);
 
-      uint64_t Size() const override { return m_size; }
-      void Size(uint64_t size) { m_size = size; }
+      size_t Size() const override { return m_size; }
+      void Size(size_t size) { m_size = size; }
 
-      uint64_t Offset() const { return m_offset; }
-      void Offset(uint64_t offset) { m_offset = offset; }
+      size_t Offset() const { return m_offset; }
+      void Offset(size_t offset) { m_offset = offset; }
 
       static EntityCategory Category() { return EntityCategory::File; }
 
    private:
-      uint64_t m_size = 0u;
-      uint64_t m_offset = 0ull;
+      size_t m_size = 0u;
+      size_t m_offset = 0u;
    };
 
    template <class T>
@@ -67,11 +67,11 @@ namespace NFileSystem
       Directory& operator=(const Directory& src);
       Directory& operator=(Directory&& src);
 
-      uint64_t Count() const;
-      uint64_t Size() const override;
+      size_t Count() const;
+      size_t Size() const override;
       std::list<std::wstring> List() const;
 
-      void AddEntity(std::wstring, std::shared_ptr<Entity>);
+      static void AddEntity(std::shared_ptr<Directory>, std::wstring, std::shared_ptr<Entity>);
       void RemoveEntity(const std::wstring&);
       void RemoveEntity(const Entity& value);
 

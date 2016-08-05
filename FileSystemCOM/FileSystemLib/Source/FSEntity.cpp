@@ -21,7 +21,7 @@ namespace NFileSystem
       return m_parent;
    }
 
-   File::File(uint64_t offset, uint64_t size, std::shared_ptr<Directory> parent)
+   File::File(size_t offset, size_t size, std::shared_ptr<Directory> parent)
       : Entity(Category(), parent)
       , m_size(size)
       , m_offset(offset)
@@ -69,14 +69,14 @@ namespace NFileSystem
       return *this;
    }
 
-   uint64_t Directory::Count() const
+   size_t Directory::Count() const
    {
       return m_contents.size();
    }
 
-   uint64_t Directory::Size() const
+   size_t Directory::Size() const
    {
-      uint64_t totalSize = 0ul;
+      size_t totalSize = 0ul;
       for (const auto& item : m_contents)
          totalSize += item.second->Size();
 
@@ -90,10 +90,13 @@ namespace NFileSystem
       return keys;
    }
 
-   void Directory::AddEntity(std::wstring name, std::shared_ptr<Entity> entity)
+   void Directory::AddEntity(std::shared_ptr<Directory> dir, std::wstring name, std::shared_ptr<Entity> entity)
    {
-      if (!m_contents.emplace(std::move(name), std::move(entity)).second)
-         throw Exception(ErrorCode::AlreadyExists);
+      assert(dir && entity);
+
+      auto inserted = dir->m_contents.emplace(std::move(name), std::move(entity));
+      if (inserted.second)
+         inserted.first->second->Parent(dir);
    }
 
    void Directory::RemoveEntity(const std::wstring& name)

@@ -1,13 +1,9 @@
 #ifndef __vfs__COMInterfaceImpl_h__
 #define __vfs__COMInterfaceImpl_h__
 
-#include "FSInterface.h"
 #include "ReferenceCounter.h"
-
-namespace NFileSystem
-{
-   class Controller;
-}
+#include "FSInterface.h"
+#include "FSController.h"
 
 class FileSystem : public IFileSystem
 {
@@ -29,17 +25,27 @@ public:
    STDMETHOD(Delete)(ULONG inHandle) override;
 
    STDMETHOD(Exists)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const override;
-   STDMETHOD(List)(ULONG inHandle, SAFEARR_BSTR outEntities) const override;
+   STDMETHOD(List)(ULONG inHandle, LPOLESTR* outEntities, ULONG* outCount) const override;
 
    STDMETHOD(GetName)(ULONG inHandle, LPOLESTR outName) const override;
    STDMETHOD(GetSize)(ULONG inHandle, ULONG* outEntitySize) const override;
+   STDMETHOD(GetHandle)(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outHandle) const override;
 
-   STDMETHOD(Read)(ULONG inHandle, ULONG inCount, ULONG inFromPosition, BYTE_SIZEDARR* outBuffer) const override;
-   STDMETHOD(Write)(ULONG inHandle, ULONG inToPosition, BYTE_SIZEDARR inBuffer) override;
+   STDMETHOD(IsDirectory)(ULONG inHandle, BOOL* outIsDir) const override;
+   STDMETHOD(IsDirectoryByName)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const override;
+
+   STDMETHOD(IsFile)(ULONG inHandle, BOOL* outIsDir) const override;
+   STDMETHOD(IsFileByName)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const override;
+
+   STDMETHOD(Read)(ULONG inHandle, ULONG inCount, ULONG inFromPosition, LPBYTE outBuffer, ULONG* outReadCount) const override;
+   STDMETHOD(Write)(ULONG inHandle, ULONG inCount, ULONG inToPosition, LPBYTE inBuffer) override;
 
 private:
+   NFileSystem::EntityHandle Convert(ULONG comHandle) const;
+   ULONG Convert(NFileSystem::EntityHandle implHandle) const;
+
    NCOMServer::ReferenceCounter m_refCounter;
-   std::unique_ptr<NFileSystem::Controller> m_controller;
+   NFileSystem::Controller m_controller;
 };
 
 #endif // __vfs__COMInterfaceImpl_h__

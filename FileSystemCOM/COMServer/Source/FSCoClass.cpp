@@ -6,13 +6,12 @@
 
 #include "GUIDs.h"
 #include "FSCoClass.h"
-#include "FSController.h"
 #include "FSExceptions.h"
 #include <boost/optional.hpp>
 
 FileSystem::FileSystem()
    : m_refCounter(1u)
-   , m_controller(std::make_unique<NFileSystem::Controller>())
+   , m_controller()
 {}
 
 template <typename Interface>
@@ -59,11 +58,10 @@ STDMETHODIMP_(ULONG) FileSystem::Release()
 
 namespace
 {
-   ULONG CastIfNoOverflow(size_t value)
+   template <typename T>
+   ULONG SafeCast(T value)
    {
-      if (value > ULONG_MAX)
-         throw std::overflow_error("msg is not used");
-
+      static_assert(sizeof(std::decay_t<T>) <= sizeof(ULONG), "unsafe conversion");
       return static_cast<ULONG>(value);
    }
 
@@ -101,6 +99,21 @@ namespace
    }
 }
 
+NFileSystem::EntityHandle FileSystem::Convert(ULONG comHandle) const
+{
+   if(m_controller.Count() <= comHandle)
+      throw InterfaceError(E_INVALIDARG);
+
+   auto result = m_controller.Root();
+   std::advance(result, comHandle);
+   return result;
+}
+
+ULONG FileSystem::Convert(NFileSystem::EntityHandle implHandle) const
+{
+   return SafeCast(std::distance(m_controller.Root(), implHandle));
+}
+
 STDMETHODIMP FileSystem::Root(ULONG* outRootHandle) const
 {
    return CatchAll([this, outRootHandle]()
@@ -108,8 +121,7 @@ STDMETHODIMP FileSystem::Root(ULONG* outRootHandle) const
       if (nullptr == outRootHandle)
          throw InterfaceError(E_INVALIDARG);
 
-      *outRootHandle =
-         CastIfNoOverflow(m_controller->Root());
+      *outRootHandle = SafeCast(Convert(m_controller.Root()));
    });
 }
 
@@ -121,7 +133,7 @@ STDMETHODIMP FileSystem::CreateFile(ULONG inLocationHandle, LPCOLESTR inName, UL
          throw InterfaceError(E_INVALIDARG);
 
       *outCreatedHandle = 
-         m_controller->Create(inLocationHandle, inName, NFileSystem::EntityCategory::File);
+         Convert(m_controller.Create(Convert(inLocationHandle), inName, NFileSystem::EntityCategory::File));
    });
 }
 
@@ -133,7 +145,7 @@ STDMETHODIMP FileSystem::CreateDirectory(ULONG inLocationHandle, LPCOLESTR inNam
          throw InterfaceError(E_INVALIDARG);
 
       *outCreatedHandle =
-         m_controller->Create(inLocationHandle, inName, NFileSystem::EntityCategory::Directory);
+         Convert(m_controller.Create(Convert(inLocationHandle), inName, NFileSystem::EntityCategory::Directory));
    });
 }
 
@@ -141,7 +153,7 @@ STDMETHODIMP FileSystem::Delete(ULONG inHandle)
 {
    return CatchAll([this, inHandle]()
    {
-      m_controller->Delete(inHandle);
+      m_controller.Delete(Convert(inHandle));
    });
 }
 
@@ -152,27 +164,32 @@ STDMETHODIMP FileSystem::Exists(ULONG inLocationHandle, LPCOLESTR inName, BOOL* 
       if (nullptr == inName || nullptr == outResult)
          throw InterfaceError(E_INVALIDARG);
 
-      m_controller->Exists(inLocationHandle, inName);
+      m_controller.Exists(Convert(inLocationHandle), inName);
    });
 }
 
-STDMETHODIMP FileSystem::List(ULONG inHandle, SAFEARR_BSTR outEntities) const
+STDMETHODIMP FileSystem::List(ULONG inHandle, LPOLESTR* outEntities, ULONG* outCount) const
 {
-   return CatchAll([this, inHandle, &outEntities]()
+   return CatchAll([this, inHandle, &outEntities, &outCount]()
    {
-      auto entities = m_controller->List(inHandle);
-      
-      outEntities.Size = CastIfNoOverflow(entities.size());
-      outEntities.aBstr = new wireBSTR[outEntities.Size];
-      ULONG index = 0u;
+      if (nullptr != outEntities || nullptr == outCount)
+         throw InterfaceError(E_INVALIDARG);
+
+      auto entities = m_controller.List(Convert(inHandle));
+
+      *outCount = SafeCast(entities.size());
+      std::unique_ptr<LPOLESTR[]> namesArray(new LPOLESTR[*outCount]);
+
+      size_t index = 0u;
       for (const auto& item : entities)
       {
-         auto& current = outEntities.aBstr[index++];
-         current->fFlags = 0;
-         current->clSize = CastIfNoOverflow(item.length());
-         if (0u != current->clSize)
-            memcpy(&current->asData, item.data(), sizeof(std::wstring::value_type) * current->clSize);
+         auto nameLength = item.size() + 1;
+         namesArray[index] = new std::wstring::value_type[nameLength];
+         memcpy(namesArray[index], item.c_str(), sizeof(std::wstring::value_type) * nameLength);
+         index++;
       }
+
+      namesArray.release();
    });
 }
 
@@ -181,10 +198,12 @@ STDMETHODIMP FileSystem::GetName(ULONG inHandle, LPOLESTR outName) const
    return CatchAll([this, inHandle, &outName]()
    {
       if (nullptr != outName)
-         delete []outName;
+         throw InterfaceError(E_INVALIDARG);
 
-      auto name = m_controller->Name(inHandle);
-      memcpy(outName, name.c_str(), sizeof(std::wstring::value_type) * name.size());
+      auto name = m_controller.Name(Convert(inHandle));
+      auto nameLength = name.size() + 1;
+      outName = new std::wstring::value_type[nameLength];
+      memcpy(outName, name.c_str(), sizeof(std::wstring::value_type) * nameLength);
    });
 }
 
@@ -195,41 +214,97 @@ STDMETHODIMP FileSystem::GetSize(ULONG inHandle, ULONG* outEntitySize) const
       if (nullptr == outEntitySize)
          throw InterfaceError(E_INVALIDARG);
 
-      *outEntitySize =
-         CastIfNoOverflow(m_controller->Size(inHandle));
+      *outEntitySize = SafeCast(m_controller.Size(Convert(inHandle)));
    });
 }
 
-STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG inCount, ULONG inFromPosition, BYTE_SIZEDARR* outBuffer) const
+STDMETHODIMP FileSystem::GetHandle(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outHandle) const
 {
-   return CatchAll([this, inHandle, inCount, inFromPosition, &outBuffer]()
+   return CatchAll([this, inLocationHandle, inName, &outHandle]()
+   {
+      if (nullptr == inName || nullptr == outHandle)
+         throw InterfaceError(E_INVALIDARG);
+
+      *outHandle = Convert(m_controller.Handle(Convert(inLocationHandle), inName));
+   });
+}
+
+namespace
+{
+   template <class ...Args>
+   bool CheckArgs(Args... )
+   {
+      return true;
+   }
+
+   template <>
+   bool CheckArgs<ULONG, LPCOLESTR>(ULONG, LPCOLESTR inName)
+   {
+      return nullptr != inName;
+   }
+
+   template <class ...Args>
+   HRESULT CheckEntityCategory(const NFileSystem::Controller& controller, NFileSystem::EntityCategory ctg, BOOL* result, Args... args)
+   {
+      return CatchAll([&controller, ctg, result, args...]()
+      {
+         if (nullptr == result || !CheckArgs(args...))
+            throw InterfaceError(E_INVALIDARG);
+
+         *result = ctg == controller.Category(args...) ? TRUE : FALSE;
+      });
+   }
+}
+
+STDMETHODIMP FileSystem::IsDirectory(ULONG inHandle, BOOL* outIsDir) const
+{
+   return CheckEntityCategory(m_controller, NFileSystem::EntityCategory::Directory, outIsDir, Convert(inHandle));
+}
+
+STDMETHODIMP FileSystem::IsDirectoryByName(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const
+{
+   return CheckEntityCategory(m_controller, NFileSystem::EntityCategory::Directory, outIsDir, Convert(inLocationHandle), inName);
+}
+
+STDMETHODIMP FileSystem::IsFile(ULONG inHandle, BOOL* outIsFile) const
+{
+   return CheckEntityCategory(m_controller, NFileSystem::EntityCategory::File, outIsFile, Convert(inHandle));
+}
+
+STDMETHODIMP FileSystem::IsFileByName(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outIsFile) const
+{
+   return CheckEntityCategory(m_controller, NFileSystem::EntityCategory::File, outIsFile, Convert(inLocationHandle), inName);
+}
+
+STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG inCount, ULONG inFromPosition, LPBYTE outBuffer, ULONG* outReadCount) const
+{
+   return CatchAll([this, inHandle, inCount, inFromPosition, &outBuffer, &outReadCount]()
    {
       if (0u == inCount)
          return;
 
-      if (nullptr == outBuffer)
+      if (nullptr == outBuffer || nullptr == outReadCount)
          throw InterfaceError(E_INVALIDARG);
 
-      auto readResult = m_controller->Read(inHandle, inCount, inFromPosition);
+      auto readResult = m_controller.Read(Convert(inHandle), inCount, inFromPosition);
       if (!readResult.first)
          throw InterfaceError(E_UNEXPECTED);
       
-      outBuffer->clSize = CastIfNoOverflow(readResult.second);
-      outBuffer->pData = readResult.first.get();
-      readResult.first.release();
+      *outReadCount = SafeCast(readResult.second);
+      memcpy(outBuffer, readResult.first.get(), readResult.second);
    });
 }
 
-STDMETHODIMP FileSystem::Write(ULONG inHandle, ULONG inToPosition, BYTE_SIZEDARR inBuffer)
+STDMETHODIMP FileSystem::Write(ULONG inHandle, ULONG inCount, ULONG inToPosition, LPBYTE inBuffer)
 {
-   return CatchAll([this, inHandle, inToPosition, &inBuffer]()
+   return CatchAll([this, inHandle, inCount, inToPosition, &inBuffer]()
    {
-      if (0u == inBuffer.clSize)
+      if (0u == inCount)
          return;
 
-      if (nullptr == inBuffer.pData)
+      if (nullptr == inBuffer)
          throw InterfaceError(E_INVALIDARG);
 
-      m_controller->Write(inHandle, inBuffer.pData, inBuffer.clSize, inToPosition);
+      m_controller.Write(Convert(inHandle), inBuffer, inCount, inToPosition);
    });
 }
