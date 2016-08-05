@@ -1,4 +1,2 @@
 ! complete .idl file
-! think about synchronization (may be shared mutex?)
 ! extend interface with Copy, Move and Replace methods
-! more HRESULT codes
