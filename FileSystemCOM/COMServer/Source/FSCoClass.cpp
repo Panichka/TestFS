@@ -101,7 +101,7 @@ namespace
 
 NFileSystem::EntityHandle FileSystem::Convert(ULONG comHandle) const
 {
-   if(m_controller.Count() <= comHandle)
+   if(m_controller.Count() <= comHandle) // any thread can increase Count only
       throw InterfaceError(E_INVALIDARG);
 
    auto result = m_controller.Root();

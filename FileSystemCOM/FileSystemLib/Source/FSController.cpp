@@ -1,3 +1,5 @@
+#include <atomic>
+
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/thread/shared_mutex.hpp>
@@ -8,6 +10,43 @@
 
 namespace NFileSystem
 {
+   struct Controller::FSInfo
+   {
+      FSInfo() 
+         : Root(std::make_shared<Directory>())
+         , Contents({ std::weak_ptr<Entity>(Root) })
+         , Count(0u)
+      {}
+
+      void EmplaceBack(Entities::value_type&&);
+
+      EntityHandle Handle(EntityHandle location, std::shared_ptr<Entity> value) const;
+
+      std::shared_ptr<Directory> Root;
+      Entities Contents;
+      EntityHandle Last = Contents.begin();
+      std::atomic<size_t> Count;
+   };
+
+   void Controller::FSInfo::EmplaceBack(Entities::value_type&& value)
+   {
+      Contents.emplace_after(Last, std::move(value));
+      Last++;
+      Count++;
+   }
+
+   EntityHandle Controller::FSInfo::Handle(EntityHandle location, std::shared_ptr<Entity> value) const
+   {
+      auto entity = std::find_if(location, Contents.end(),
+         [&value](const EntityHandle::value_type& it)
+      {
+         return !it.expired() && it.lock().get() == value.get();
+      });
+
+      assert(Contents.end() != entity);
+      return entity;
+   }
+
    struct Controller::FSInfoStorage
    {
       static const Path& PhysicalFileName()
@@ -105,11 +144,11 @@ namespace NFileSystem
                if (!entity->Parent().lock())
                   continue;
 
-               owner.m_contents.emplace_back(entity);
+               owner.m_info->EmplaceBack(entity);
             }
          };
 
-         serialize(owner.m_root);
+         serialize(owner.m_info->Root);
       }
       catch(...)
       {
@@ -210,10 +249,10 @@ namespace NFileSystem
       boost::iostreams::mapped_file_sink file;
       auto infoBlockMaxSize =
          sizeof(InfoBlockSize) + sizeof(DataBlockSize) + sizeof(DataBlockPos) +          
-         owner.m_contents.size() *
+         owner.Count() *
             (sizeof(uint64_t) + 256u + sizeof(uint64_t) + sizeof(uint64_t));
       
-      auto totalMaxSize = infoBlockMaxSize + owner.m_root->Size();
+      auto totalMaxSize = infoBlockMaxSize + owner.m_info->Root->Size();
       try
       {
          auto fileSize = boost::filesystem::file_size(PhysicalFileName());
@@ -259,7 +298,7 @@ namespace NFileSystem
             }
          };         
 
-         deserialize(owner.m_root);
+         deserialize(owner.m_info->Root);
 
          InfoBlockSize = fileData - file.data();
 
@@ -278,9 +317,8 @@ namespace NFileSystem
 
    Controller::Controller()
       : m_mutex(std::make_unique<boost::shared_mutex>())
+      , m_info(std::make_unique<FSInfo>())
       , m_infoStrage(std::make_unique<FSInfoStorage>())
-      , m_root(std::make_shared<Directory>())
-      , m_contents({ std::weak_ptr<Entity>(m_root) })
    {
       namespace fs = boost::filesystem;
       if (!fs::exists(FSInfoStorage::PhysicalFileName()))
@@ -314,7 +352,7 @@ namespace NFileSystem
 
       try
       {
-         if (m_contents.size() > 1u) //something besides root
+         if (Count() > 1u) //something besides root
             m_infoStrage->SaveFSInfo(*this);
       }
       catch(...)
@@ -323,9 +361,14 @@ namespace NFileSystem
       }
    }
 
+   size_t Controller::Count() const
+   {
+      return m_info->Count.load();
+   }
+
    OptionalShared<Entity> Controller::ExistingEntity(EntityHandle handle) const
    {
-      if (m_contents.end() == handle)
+      if (m_info->Contents.end() == handle)
          return boost::none;
 
       auto entity = handle->lock();
@@ -337,7 +380,7 @@ namespace NFileSystem
 
    EntityHandle Controller::Root() const
    {
-      return m_contents.begin();
+      return m_info->Contents.begin();
    }
 
    EntityHandle Controller::Create(EntityHandle location, const std::wstring& name, EntityCategory category)
@@ -352,7 +395,7 @@ namespace NFileSystem
 
       std::shared_ptr<Entity> created;
       if (EntityCategory::File == category)
-         created = std::make_shared<File>(m_root->Size());
+         created = std::make_shared<File>(m_info->Root->Size());
       else if (EntityCategory::Directory == category)
          created = std::make_shared<Directory>();
       else
@@ -360,14 +403,10 @@ namespace NFileSystem
 
       Directory::AddEntity(optDir.value(), name, created);
       if (!created->Parent().lock())
-         return Handle(location, created);
+         return m_info->Handle(location, created);
 
-      auto position = m_contents.size();
-      m_contents.emplace_back(created);
-
-      auto result = m_contents.begin();
-      std::advance(result, position);
-      return result;
+      m_info->EmplaceBack(created);
+      return m_info->Last;
    }
 
    void Controller::Delete(EntityHandle handle)
@@ -440,18 +479,6 @@ namespace NFileSystem
       return optEntity.value()->Size();
    }
 
-   EntityHandle Controller::Handle(EntityHandle location, std::shared_ptr<Entity> value) const
-   {
-      auto entity = std::find_if(location, m_contents.end(),
-         [&value](const EntityHandle::value_type& it)
-         {
-            return !it.expired() && it.lock().get() == value.get();
-         });
-
-      assert(m_contents.end() != entity);
-      return entity;
-   }
-
    EntityHandle Controller::Handle(EntityHandle location, const std::wstring& name) const
    {
       boost::shared_lock<boost::shared_mutex> lock(*m_mutex);
@@ -464,7 +491,7 @@ namespace NFileSystem
       if (!optEntity)
          throw Exception(ErrorCode::DoesNotExists);
 
-      return Handle(location, optEntity.get());
+      return m_info->Handle(location, optEntity.get());
    }
 
    EntityCategory Controller::Category(EntityHandle location, const std::wstring& name) const
