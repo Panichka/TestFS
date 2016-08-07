@@ -10,9 +10,13 @@ struct IFileSystem : IUnknown
 	STDMETHOD(Delete)(ULONG inHandle) = 0;
 
 	STDMETHOD(Exists)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const = 0;
-	STDMETHOD(List)(ULONG inHandle, LPOLESTR* outEntities, ULONG* outCount) const = 0;
+   //! @note allocates memory for outEntities
+   //! @retval E_INVALIDARG if outEntities is not null
+	STDMETHOD(List)(ULONG inHandle, LPOLESTR** outEntities, ULONG* outCount) const = 0;
 
-   STDMETHOD(GetName)(ULONG inHandle, LPOLESTR outName) const = 0;
+   //! @note allocates memory for outName
+   //! @retval E_INVALIDARG if outName is not null
+   STDMETHOD(GetName)(ULONG inHandle, LPOLESTR* outName) const = 0;
 	STDMETHOD(GetSize)(ULONG inHandle, ULONG* outEntitySize) const = 0;
    STDMETHOD(GetHandle)(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outHandle) const = 0;
 

@@ -25,7 +25,7 @@ boost::optional<Interface*> getInterface(FileSystem& object, REFIID iid, REFIID 
 
 STDMETHODIMP FileSystem::QueryInterface(REFIID riid, LPVOID *ppv)
 {
-   if (nullptr == ppv || nullptr != *ppv)
+   if (nullptr == ppv)// || nullptr != *ppv)
       return E_INVALIDARG;
 
    boost::optional<void*> result;
@@ -168,11 +168,11 @@ STDMETHODIMP FileSystem::Exists(ULONG inLocationHandle, LPCOLESTR inName, BOOL* 
    });
 }
 
-STDMETHODIMP FileSystem::List(ULONG inHandle, LPOLESTR* outEntities, ULONG* outCount) const
+STDMETHODIMP FileSystem::List(ULONG inHandle, LPOLESTR** outEntities, ULONG* outCount) const
 {
-   return CatchAll([this, inHandle, &outEntities, &outCount]()
+   return CatchAll([this, inHandle, outEntities, &outCount]()
    {
-      if (nullptr != outEntities || nullptr == outCount)
+      if (nullptr == outEntities || nullptr != *outEntities || nullptr == outCount)
          throw InterfaceError(E_INVALIDARG);
 
       auto entities = m_controller.List(Convert(inHandle));
@@ -189,20 +189,21 @@ STDMETHODIMP FileSystem::List(ULONG inHandle, LPOLESTR* outEntities, ULONG* outC
          index++;
       }
 
+      *outEntities = namesArray.get();
       namesArray.release();
    });
 }
 
-STDMETHODIMP FileSystem::GetName(ULONG inHandle, LPOLESTR outName) const
+STDMETHODIMP FileSystem::GetName(ULONG inHandle, LPOLESTR* outName) const
 {
    return CatchAll([this, inHandle, &outName]()
    {
-      if (nullptr != outName)
+      if (nullptr == outName || nullptr != *outName)
          throw InterfaceError(E_INVALIDARG);
 
       auto name = m_controller.Name(Convert(inHandle));
       auto nameLength = name.size() + 1;
-      outName = new std::wstring::value_type[nameLength];
+      *outName = new std::wstring::value_type[nameLength];
       memcpy(outName, name.c_str(), sizeof(std::wstring::value_type) * nameLength);
    });
 }

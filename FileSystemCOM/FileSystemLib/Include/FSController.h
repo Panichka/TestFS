@@ -1,7 +1,6 @@
 #ifndef __vfs__FSController_h__
 #define __vfs__FSController_h__
 
-#include <list>
 #include <forward_list>
 #include <memory>
 #include <boost/filesystem/path.hpp>

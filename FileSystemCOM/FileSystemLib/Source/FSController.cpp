@@ -2,11 +2,58 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/iostreams/stream.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
 
 #include "FSController.h"
 #include "FSExceptions.h"
+
+using MMIFStream = boost::iostreams::stream<boost::iostreams::mapped_file_source>;
+using MMOFStream = boost::iostreams::stream<boost::iostreams::mapped_file_sink>;
+
+namespace boost
+{
+   namespace iostreams
+   {
+      template <typename Value, typename = std::enable_if_t<
+         std::is_integral<std::remove_reference_t<Value>>::value ||
+         std::is_enum<std::remove_reference_t<Value>>::value>>
+         auto& operator >> (MMIFStream& stream, Value& value)
+      {
+         return stream.read(reinterpret_cast<char*>(&value), sizeof(std::decay_t<Value>));
+      }
+
+      auto& operator >> (MMIFStream& stream, std::wstring& value)
+      {
+         std::wstring::value_type character(L'\0');
+         do
+         {
+            stream.read(reinterpret_cast<char*>(&character), sizeof(std::wstring::value_type));
+            if (L'\0' == character)
+               return stream;
+
+            value += character;
+
+         } while (!stream.eof());
+
+         return stream;
+      }
+
+      template <typename Value, typename = typename std::enable_if<
+         std::is_integral<std::remove_reference<Value>::type>::value ||
+         std::is_enum<std::remove_reference<Value>::type>::value>::type>
+         auto& operator<< (MMOFStream& stream, const Value& value)
+      {
+         return stream.write(reinterpret_cast<const char*>(&value), sizeof(std::decay_t<Value>));
+      }
+
+      auto& operator<< (MMOFStream& stream, const std::wstring& value)
+      {
+         return stream.write(reinterpret_cast<const char*>(value.c_str()), (value.size() + 1) * sizeof(std::wstring::value_type));
+      }
+   }
+}
 
 namespace NFileSystem
 {
@@ -15,7 +62,7 @@ namespace NFileSystem
       FSInfo() 
          : Root(std::make_shared<Directory>())
          , Contents({ std::weak_ptr<Entity>(Root) })
-         , Count(0u)
+         , Count(1u)
       {}
 
       void EmplaceBack(Entities::value_type&&);
@@ -63,98 +110,94 @@ namespace NFileSystem
       void LoadFSInfo(Controller& owner);
       void SaveFSInfo(const Controller& owner);
 
-      uint64_t InfoBlockSize = 0u;
+      void Serialize(std::shared_ptr<Directory> dir, MMIFStream &mmfStream, Controller& owner);
+      void Deserialize(std::shared_ptr<const Directory> dir, MMOFStream &mmfStream, size_t shiftedOn);
+
       uint64_t DataBlockSize = 0u;
-      uint64_t DataBlockPos = 0u;
+      uint64_t DataBlockPos = boost::iostreams::mapped_file::alignment();
    };
 
-   template <class UIntType>
-   UIntType AlignedOffset(UIntType offset)
+   namespace
    {
-      return offset - offset % boost::iostreams::mapped_file::alignment();
+      template <class UIntType>
+      UIntType AlignedOffset(UIntType offset)
+      {
+         return offset - offset % boost::iostreams::mapped_file::alignment();
+      }
+
+      template <class UIntType>
+      UIntType RelativeOffset(UIntType offset)
+      {
+         return offset % boost::iostreams::mapped_file::alignment();
+      }
    }
 
-   template <class UIntType>
-   UIntType RelativeOffset(UIntType offset)
+   void Controller::FSInfoStorage::Serialize(std::shared_ptr<Directory> dir, MMIFStream& mmfStream, Controller& owner)
    {
-      return offset % boost::iostreams::mapped_file::alignment();
+      uint64_t countInDir;
+      mmfStream >> countInDir;
+
+      for (auto index = 0u; index < countInDir; index++)
+      {
+         EntityCategory category;
+         mmfStream >> category;
+
+         std::wstring name(L"");
+         mmfStream >> name;
+
+         std::shared_ptr<Entity> entity;
+         if (EntityCategory::File == category)
+         {
+            uint64_t size = 0;
+            mmfStream >> size;
+
+            uint64_t offset = 0;
+            mmfStream >> offset;
+            entity = std::make_shared<File>(offset, size);
+         }
+         else if (EntityCategory::Directory == category)
+         {
+            entity = std::make_shared<Directory>();            
+         }
+         else
+         {
+            assert(false);
+         }
+
+         Directory::AddEntity(dir, name, entity);
+         assert(!entity->Parent().expired());
+
+         owner.m_info->EmplaceBack(entity);
+
+         if (EntityCategory::Directory == category)
+            Serialize(std::static_pointer_cast<Directory>(entity), mmfStream, owner);
+      }
    }
 
    void Controller::FSInfoStorage::LoadFSInfo(Controller& owner)
    {
       constexpr auto foremostBlockSize =
-         sizeof(InfoBlockSize) + sizeof(DataBlockSize) + sizeof(DataBlockPos);
+         sizeof(DataBlockSize) + sizeof(DataBlockPos);
 
-      boost::iostreams::mapped_file_source file;
+      using namespace boost::iostreams;
+      MMIFStream mmfStream;
+
       try
       {
-         file.open(PhysicalFileName(), foremostBlockSize);
+         mmfStream.open(PhysicalFileName(), foremostBlockSize);
+         mmfStream >> DataBlockSize >> DataBlockPos;
+         mmfStream.close();
 
-         auto fileData = file.data();
-         InfoBlockSize = *reinterpret_cast<const decltype(InfoBlockSize)*>(fileData);
-         fileData += sizeof(InfoBlockSize);
-         DataBlockSize = *reinterpret_cast<const decltype(DataBlockSize)*>(fileData);
-         fileData += sizeof(DataBlockSize);
-         DataBlockPos = *reinterpret_cast<const decltype(DataBlockPos)*>(fileData);
-
-         if (0u == InfoBlockSize)
+         if (0u == DataBlockPos)
             return;
 
-         file.close();
+         mmfStream.open(PhysicalFileName(), DataBlockPos);
+         mmfStream.ignore(foremostBlockSize);
 
-         file.open(PhysicalFileName(), InfoBlockSize);
-         fileData += foremostBlockSize;
-
-         std::function<void(std::shared_ptr<Directory>)> serialize =
-            [&owner, &fileData, &serialize](std::shared_ptr<Directory> dir) -> void
-         {
-            auto countInDir = *reinterpret_cast<const uint64_t*>(fileData);
-            fileData += sizeof(uint64_t);
-
-            for (auto index = 0u; index < countInDir; index++)
-            {
-               auto category = *reinterpret_cast<const EntityCategory*>(fileData);
-               fileData += sizeof(category);
-
-               std::wstring name(reinterpret_cast<const std::wstring::value_type*>(fileData));
-               fileData += name.size() * sizeof(std::wstring::value_type);
-
-               std::shared_ptr<Entity> entity;
-               if (EntityCategory::File == category)
-               {
-                  auto size = *reinterpret_cast<const uint64_t*>(fileData);
-                  fileData += sizeof(uint64_t);
-                  auto offset = *reinterpret_cast<const uint64_t*>(fileData);
-                  fileData += sizeof(uint64_t);
-                  entity = std::make_shared<File>(offset, size);
-               }
-               else if (EntityCategory::Directory == category)
-               {
-                  auto tmp = std::make_shared<Directory>();
-                  serialize(tmp);
-                  entity = std::move(tmp);
-               }
-               else
-               {
-                  assert(false);
-               }
-
-               Directory::AddEntity(dir, name, entity);
-
-               if (!entity->Parent().lock())
-                  continue;
-
-               owner.m_info->EmplaceBack(entity);
-            }
-         };
-
-         serialize(owner.m_info->Root);
+         Serialize(owner.m_info->Root, mmfStream, owner);
       }
       catch(...)
       {
-         //if (file.is_open())
-            //file.close();
-
          throw Exception(ErrorCode::InternalError);
       }      
    }
@@ -244,70 +287,71 @@ namespace NFileSystem
       }
    }
 
+   void Controller::FSInfoStorage::Deserialize(std::shared_ptr<const Directory> dir, MMOFStream &mmfStream, size_t shiftedOn)
+   {
+      {
+         mmfStream << static_cast<uint64_t>(dir->Count());
+
+         for (const auto& item : *dir)
+         {
+            mmfStream << item.second->Category;
+            mmfStream << item.first;
+
+            if (EntityCategory::File == item.second->Category)
+            {
+               auto entity = std::static_pointer_cast<File>(item.second);
+               mmfStream << static_cast<uint64_t>(entity->Size());
+               mmfStream << static_cast<uint64_t>(entity->Offset() + shiftedOn);
+            }
+            else if (EntityCategory::Directory == item.second->Category)
+            {
+               Deserialize(std::static_pointer_cast<Directory>(item.second), mmfStream, shiftedOn);
+            }
+            else
+            {
+               assert(false);
+            }
+         }
+      };
+   }
+
    void Controller::FSInfoStorage::SaveFSInfo(const Controller& owner)
    {
-      boost::iostreams::mapped_file_sink file;
+      constexpr auto foremostBlockSize =
+         sizeof(DataBlockSize) + sizeof(DataBlockPos);
+
       auto infoBlockMaxSize =
-         sizeof(InfoBlockSize) + sizeof(DataBlockSize) + sizeof(DataBlockPos) +          
+         foremostBlockSize +
          owner.Count() *
             (sizeof(uint64_t) + 256u + sizeof(uint64_t) + sizeof(uint64_t));
       
       auto totalMaxSize = infoBlockMaxSize + owner.m_info->Root->Size();
       try
       {
-         auto fileSize = boost::filesystem::file_size(PhysicalFileName());
-         if (InfoBlockSize < infoBlockMaxSize)
-            EnlargeFile(fileSize, totalMaxSize, DataBlockPos);
-
-         file.open(PhysicalFileName(), infoBlockMaxSize);
-
-         auto fileData = file.data();
-         auto shiftData = totalMaxSize - fileSize;
-
-         std::function<void(std::shared_ptr<Directory>)> deserialize =
-            [&fileData, &deserialize, shiftData](std::shared_ptr<Directory> dir) -> void
+         auto fileSize = boost::filesystem::file_size(PhysicalFileName()); 
+         auto shiftedOn = 0u;
+         if (DataBlockPos < infoBlockMaxSize)
          {
-            *reinterpret_cast<uint64_t*>(fileData) = dir->Count();
-            fileData += sizeof(uint64_t);
-
-            for (const auto& item : *dir)
+            if (0u == DataBlockSize)
             {
-               *reinterpret_cast<EntityCategory*>(fileData) = item.second->Category;
-               fileData += sizeof(item.second->Category);
-
-               auto nameSize = item.first.size() * sizeof(std::wstring::value_type);
-               memcpy(fileData, item.first.c_str(), nameSize);
-               fileData += nameSize;
-
-               if (EntityCategory::File == item.second->Category)
-               {
-                  auto& entity = *static_cast<const File*>(item.second.get());
-                  *reinterpret_cast<uint64_t*>(fileData) = entity.Size();
-                  fileData += sizeof(uint64_t);
-                  *reinterpret_cast<uint64_t*>(fileData) = entity.Offset() + shiftData;
-                  fileData += sizeof(uint64_t);
-               }
-               else if (EntityCategory::Directory == item.second->Category)
-               {
-                  deserialize(std::static_pointer_cast<Directory>(item.second));
-               }
-               else
-               {
-                  assert(false);
-               }
+               ResizeFile(fileSize + infoBlockMaxSize - DataBlockPos);
+               shiftedOn = infoBlockMaxSize - DataBlockPos;
             }
-         };         
+            else
+            {
+               EnlargeFile(fileSize, totalMaxSize, DataBlockPos);
+               shiftedOn = totalMaxSize - fileSize;
+            }
+         }
 
-         deserialize(owner.m_info->Root);
+         MMOFStream mmfStream(PhysicalFileName(), infoBlockMaxSize);
+         mmfStream.seekp(foremostBlockSize);
+         Deserialize(owner.m_info->Root, mmfStream, shiftedOn);
+         DataBlockPos = std::max(DataBlockPos, static_cast<uint64_t>(mmfStream.tellp()));
+         mmfStream.close();
 
-         InfoBlockSize = fileData - file.data();
-
-         fileData = file.data();
-         *reinterpret_cast<decltype(InfoBlockSize)*>(fileData) = InfoBlockSize;
-         fileData += sizeof(InfoBlockSize);
-         *reinterpret_cast<decltype(DataBlockSize)*>(fileData) = DataBlockSize;
-         fileData += sizeof(DataBlockSize);
-         *reinterpret_cast<decltype(DataBlockPos)*>(fileData) = DataBlockPos;
+         mmfStream.open(PhysicalFileName(), foremostBlockSize);
+         mmfStream << DataBlockSize << DataBlockPos;
       }
       catch (...)
       {
@@ -323,9 +367,12 @@ namespace NFileSystem
       namespace fs = boost::filesystem;
       if (!fs::exists(FSInfoStorage::PhysicalFileName()))
       {
-         fs::ofstream tmp(FSInfoStorage::PhysicalFileName(), std::ios_base::binary);
-         if ((tmp.rdstate() & std::ofstream::failbit) != 0)
-            throw Exception(ErrorCode::InternalError);
+         {
+            fs::ofstream tmp(FSInfoStorage::PhysicalFileName(), std::ios_base::binary);
+            if ((tmp.rdstate() & std::ofstream::failbit) != 0)
+               throw Exception(ErrorCode::InternalError);
+         }
+         ResizeFile(m_infoStrage->DataBlockPos);
       }
       else
       {
@@ -340,20 +387,19 @@ namespace NFileSystem
    Controller::~Controller()
    {
       namespace fs = boost::filesystem;
-      if (!fs::exists(FSInfoStorage::PhysicalFileName()))
+      if (!fs::exists(FSInfoStorage::PhysicalFileName()) || !fs::is_regular_file(FSInfoStorage::PhysicalFileName()))
       {
-         fs::ifstream tmp(FSInfoStorage::PhysicalFileName(), std::ios_base::binary);
-         if ((tmp.rdstate() & std::ifstream::failbit) != 0)
-            return;
+         //log
+         return;
       }
-
-      if (!fs::is_regular_file(FSInfoStorage::PhysicalFileName()))
-            return;
 
       try
       {
          if (Count() > 1u) //something besides root
+         {
+            boost::unique_lock<boost::shared_mutex> uniqueLock(*m_mutex);
             m_infoStrage->SaveFSInfo(*this);
+         }
       }
       catch(...)
       {
@@ -391,6 +437,15 @@ namespace NFileSystem
       if (!optDir)
          throw Exception(ErrorCode::DoesNotExists);
 
+      auto optEntity = optDir->get()->FindEntity(name);
+      if (optEntity)
+      {
+         if(category != optDir.get()->Category())
+            throw Exception(ErrorCode::AlreadyExists);
+
+         return m_info->Handle(location, optDir.get());
+      }
+
       boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
 
       std::shared_ptr<Entity> created;
@@ -402,8 +457,7 @@ namespace NFileSystem
          assert(false);
 
       Directory::AddEntity(optDir.value(), name, created);
-      if (!created->Parent().lock())
-         return m_info->Handle(location, created);
+      assert(!created->Parent().expired());
 
       m_info->EmplaceBack(created);
       return m_info->Last;
@@ -565,7 +619,7 @@ namespace NFileSystem
       if (!optFile)
          throw Exception(ErrorCode::DoesNotExists);
 
-      if (optFile.value()->Size() <= position)
+      if (optFile.value()->Size() < position)
          throw Exception(ErrorCode::InvalidArgument);
 
       boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);

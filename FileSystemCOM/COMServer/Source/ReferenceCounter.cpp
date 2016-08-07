@@ -32,7 +32,7 @@ namespace NCOMServer
       while (!(0u == current || m_counter->Value.compare_exchange_weak(current, current - 1)))
       { ; }
 
-      return current;
+      return current - 1;
    }
 
    bool ReferenceCounter::operator==(uint32_t to) const

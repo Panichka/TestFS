@@ -25,9 +25,9 @@ public:
    STDMETHOD(Delete)(ULONG inHandle) override;
 
    STDMETHOD(Exists)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const override;
-   STDMETHOD(List)(ULONG inHandle, LPOLESTR* outEntities, ULONG* outCount) const override;
+   STDMETHOD(List)(ULONG inHandle, LPOLESTR** outEntities, ULONG* outCount) const override;
 
-   STDMETHOD(GetName)(ULONG inHandle, LPOLESTR outName) const override;
+   STDMETHOD(GetName)(ULONG inHandle, LPOLESTR* outName) const override;
    STDMETHOD(GetSize)(ULONG inHandle, ULONG* outEntitySize) const override;
    STDMETHOD(GetHandle)(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outHandle) const override;
 
