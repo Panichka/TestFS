@@ -63,3 +63,8 @@ ipch/
 *.ldf
 *.db
 *.rawdata
+*.tlog
+*.ilk
+*.log
+*.pdb
+*.idb

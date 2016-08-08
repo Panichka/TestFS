@@ -154,4 +154,18 @@ BOOST_FIXTURE_TEST_CASE(ReadAndWriteWithOffset, ControllerWithEntity<EntityCateg
 	BOOST_CHECK(0 == memcmp(readResult.first.get(), data, readResult.second));
 }
 
+BOOST_FIXTURE_TEST_CASE(SimpleGetters, ControllerWithEntity<EntityCategory::File>)
+{
+   auto Internal = WeakInternal.lock();
+
+   BOOST_CHECK_EQUAL(0u, Internal->Size(Entity));
+   BOOST_CHECK(Name == Internal->Name(Entity));
+   BOOST_CHECK(Category == Internal->Category(Entity));
+   BOOST_CHECK_EQUAL(2u, Internal->Count());
+
+   uint8_t data[] = "abcdefg";
+   Internal->Write(Entity, data, sizeof(data));
+   BOOST_CHECK_EQUAL(sizeof(data), Internal->Size(Entity));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

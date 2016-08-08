@@ -1,5 +1,37 @@
 #ifndef __vfs__FSController_h__
 #define __vfs__FSController_h__
+//
+//! @brief Single-file virtual file system controller
+//! @details Physical file consists of f.s. info block and data block
+//! Data block contains siquential data of all saved files.
+//! Directories don't hold any data in data block. A position and a size
+//! of file are specified in info block as described bellow
+//! @verbatim
+//!    +-------------------+-----------------+-------------------+-----------------+
+//!    | uint64_t          | uint64_t        | uint64_t          | ...             |
+//!    +-------------------+-----------------+-------------------+-----------------+
+//!    | data block offset | data block size | count of entities | entities info   |
+//!    |                   |                 | in root (not rec.)|                 |
+//!    +-------------------+-----------------+-------------------+-----------------+
+//! @endverbatim
+//! 
+//! Entities info may contain siquence either of files info:
+//! @verbatim
+//!    +----------------------+-----------------+---------------------+
+//!    | EntityCategory       | uint64_t        | uint64_t            |
+//!    +----------------------+-----------------+---------------------+
+//!    | EntityCategory::File | size of file    | file absolute offset|
+//!    +----------------------+-----------------+---------------------+
+//! @endverbatim
+//! or directories info:
+//! @verbatim
+//!    +---------------------------+-------------------+-------------+
+//!    | EntityCategory            | uint64_t          | ...         |
+//!    +---------------------------+-------------------+-------------+
+//!    | EntityCategory::Directory | count of entities | same as for |
+//!    |                           | in dir (not rec.) | root        |
+//!    +---------------------------+-------------------+-------------+
+//! @endverbatim
 
 #include <forward_list>
 #include <memory>

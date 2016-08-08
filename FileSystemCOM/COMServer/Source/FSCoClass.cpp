@@ -88,9 +88,14 @@ namespace
       catch (const NFileSystem::Exception& error)
       {
          using namespace NFileSystem;
-
-         const HRESULT CustomerDefinedError = 0x20000000;
-         return CustomerDefinedError | static_cast<uint8_t>(error.Code);
+         switch (error.Code)
+         {
+         case ErrorCode::InvalidArgument:
+            return E_INVALIDARG;
+         default:
+            const HRESULT CustomerDefinedError = 0x20000000;
+            return CustomerDefinedError | static_cast<uint8_t>(error.Code);
+         }
       }
       catch (...)
       {
