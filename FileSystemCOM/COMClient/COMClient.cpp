@@ -1,7 +1,6 @@
 // COMClient.cpp : Defines the entry point for the console application.
 //
 #include <memory>
-#include <exception>
 #include <functional>
 #include <future>
 #include <vector>
@@ -24,7 +23,7 @@ namespace
       Releasable(const Releasable&) = delete;
       void operator=(const Releasable&) = delete;
 
-      Releasable(std::function<std::pair<HRESULT, T*>()>&& init)
+      explicit Releasable(std::function<std::pair<HRESULT, T*>()>&& init)
       {
          auto result = init();
          if (FAILED(result.first))
@@ -94,7 +93,6 @@ int main()
       */
 
       /*----------------------------------- create dirs recursivly ------------------------------------*/
-      auto createDir = []()
       {
          Releasable<IFileSystem> ifs([]()
          {
@@ -102,7 +100,7 @@ int main()
             return std::make_pair(CoCreateInstance(CLSID_FS, 0, CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER, IID_FS, (LPVOID *)&ifsPtr), ifsPtr);
          });
 
-         ULONG rootHandle;
+         ULONGLONG rootHandle;
          if (FAILED(ifs.Ptr->Root(&rootHandle)))
             return;
 
@@ -112,14 +110,14 @@ int main()
          std::vector<std::future<std::pair<HRESULT, std::wstring>>> futures;
          futures.reserve(CountRecursivly<nestingDepth>(childCount)); //no reallocations for async push_back
 
-         std::function<void(ULONG, uint32_t, const std::wstring&)> func =
-            [&ifs, &futures, &func, childCount](ULONG handle, uint32_t depth, const std::wstring& path)
+         std::function<void(ULONGLONG, uint32_t, const std::wstring&)> func =
+            [&ifs, &futures, &func, childCount](ULONGLONG handle, uint32_t depth, const std::wstring& path)
          {
             for (auto index = 0u; index < childCount; ++index)
             {
                auto ftr = std::async(std::launch::deferred, [&ifs, &futures, &func, index, handle, depth, path]()
                {
-                  ULONG created;
+                  ULONGLONG created;
                   std::wstring relativePath(1u, L'a' + index);
  
                   auto result = std::make_pair<HRESULT, std::wstring>(
@@ -147,9 +145,8 @@ int main()
 
             ++it;
          }
-      };
+      }
 
-      createDir();
       /*----------------------------------- list root recursivly -------------------------------------------------*/
       auto listDirFuture = std::async(std::launch::async, []()
       {
@@ -159,22 +156,22 @@ int main()
             return std::make_pair(CoCreateInstance(CLSID_FS, 0, CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER, IID_FS, (LPVOID *)&ifsPtr), ifsPtr);
          });
 
-         ULONG rootHandle;
+         ULONGLONG rootHandle;
          if (FAILED(ifs.Ptr->Root(&rootHandle)))
             return;
 
-         std::function<void(ULONG, std::wstring&&)> func = [&ifs, &func](ULONG dirHandle, std::wstring&& dirPath)
+         std::function<void(ULONGLONG, std::wstring&&)> func = [&ifs, &func](ULONGLONG dirHandle, std::wstring&& dirPath)
          {
             LPOLESTR* names = nullptr;
-            ULONG count;
+            ULONGLONG count;
             ifs.Ptr->List(dirHandle, &names, &count);
 
-            for (ULONG index = 0u; index < count; ++index)
+            for (ULONGLONG index = 0u; index < count; ++index)
             {
                auto path = dirPath + L"/" + names[index];
                std::wcout << L'\t' << path << L'\n';
 
-               ULONG handle;
+               ULONGLONG handle;
                if (SUCCEEDED(ifs.Ptr->GetHandle(dirHandle, names[index], &handle)))
                {
                   BOOL isDir = false;
@@ -188,18 +185,7 @@ int main()
          func(rootHandle, L"");
       });
 
-
-      std::vector<std::future<void>> futures;
-      futures.push_back(std::move(listDirFuture));
-      /*----------------------------------- create and write files recursivly ------------------------------------*/
-      //
-      /*----------------------------------- delete some entities recursivly --------------------------------------*/
-      //
-
-      std::for_each(futures.begin(), futures.end(), [](std::future<void> & fut)
-      {
-         fut.get();
-      });
+      listDirFuture.get();
    }
    catch (std::future_error& e)
    {

@@ -59,10 +59,10 @@ STDMETHODIMP_(ULONG) FileSystem::Release()
 namespace
 {
    template <typename T>
-   ULONG SafeCast(T value)
+   ULONGLONG SafeCast(T value)
    {
-      static_assert(sizeof(std::decay_t<T>) <= sizeof(ULONG), "unsafe conversion");
-      return static_cast<ULONG>(value);
+      static_assert(sizeof(std::decay_t<T>) <= sizeof(ULONGLONG), "unsafe conversion");
+      return static_cast<ULONGLONG>(value);
    }
 
    struct InterfaceError
@@ -99,7 +99,7 @@ namespace
    }
 }
 
-NFileSystem::EntityHandle FileSystem::Convert(ULONG comHandle) const
+NFileSystem::EntityHandle FileSystem::Convert(ULONGLONG comHandle) const
 {
    if(m_controller.Count() <= comHandle) // any thread can increase Count only
       throw InterfaceError(E_INVALIDARG);
@@ -109,12 +109,12 @@ NFileSystem::EntityHandle FileSystem::Convert(ULONG comHandle) const
    return result;
 }
 
-ULONG FileSystem::Convert(NFileSystem::EntityHandle implHandle) const
+ULONGLONG FileSystem::Convert(NFileSystem::EntityHandle implHandle) const
 {
    return SafeCast(std::distance(m_controller.Root(), implHandle));
 }
 
-STDMETHODIMP FileSystem::Root(ULONG* outRootHandle) const
+STDMETHODIMP FileSystem::Root(ULONGLONG* outRootHandle) const
 {
    return CatchAll([this, outRootHandle]()
    {
@@ -125,7 +125,7 @@ STDMETHODIMP FileSystem::Root(ULONG* outRootHandle) const
    });
 }
 
-STDMETHODIMP FileSystem::CreateFile(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outCreatedHandle)
+STDMETHODIMP FileSystem::CreateFile(ULONGLONG inLocationHandle, LPCOLESTR inName, ULONGLONG* outCreatedHandle)
 {
    return CatchAll([this, inLocationHandle, inName, outCreatedHandle]()
    {
@@ -137,7 +137,7 @@ STDMETHODIMP FileSystem::CreateFile(ULONG inLocationHandle, LPCOLESTR inName, UL
    });
 }
 
-STDMETHODIMP FileSystem::CreateDirectory(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outCreatedHandle)
+STDMETHODIMP FileSystem::CreateDirectory(ULONGLONG inLocationHandle, LPCOLESTR inName, ULONGLONG* outCreatedHandle)
 {
    return CatchAll([this, inLocationHandle, inName, &outCreatedHandle]()
    {
@@ -149,7 +149,7 @@ STDMETHODIMP FileSystem::CreateDirectory(ULONG inLocationHandle, LPCOLESTR inNam
    });
 }
 
-STDMETHODIMP FileSystem::Delete(ULONG inHandle)
+STDMETHODIMP FileSystem::Delete(ULONGLONG inHandle)
 {
    return CatchAll([this, inHandle]()
    {
@@ -157,7 +157,7 @@ STDMETHODIMP FileSystem::Delete(ULONG inHandle)
    });
 }
 
-STDMETHODIMP FileSystem::Exists(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const
+STDMETHODIMP FileSystem::Exists(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const
 {
    return CatchAll([this, inLocationHandle, inName, outResult]()
    {
@@ -168,7 +168,7 @@ STDMETHODIMP FileSystem::Exists(ULONG inLocationHandle, LPCOLESTR inName, BOOL* 
    });
 }
 
-STDMETHODIMP FileSystem::List(ULONG inHandle, LPOLESTR** outEntities, ULONG* outCount) const
+STDMETHODIMP FileSystem::List(ULONGLONG inHandle, LPOLESTR** outEntities, ULONGLONG* outCount) const
 {
    return CatchAll([this, inHandle, outEntities, &outCount]()
    {
@@ -194,7 +194,7 @@ STDMETHODIMP FileSystem::List(ULONG inHandle, LPOLESTR** outEntities, ULONG* out
    });
 }
 
-STDMETHODIMP FileSystem::GetName(ULONG inHandle, LPOLESTR* outName) const
+STDMETHODIMP FileSystem::GetName(ULONGLONG inHandle, LPOLESTR* outName) const
 {
    return CatchAll([this, inHandle, &outName]()
    {
@@ -208,7 +208,7 @@ STDMETHODIMP FileSystem::GetName(ULONG inHandle, LPOLESTR* outName) const
    });
 }
 
-STDMETHODIMP FileSystem::GetSize(ULONG inHandle, ULONG* outEntitySize) const
+STDMETHODIMP FileSystem::GetSize(ULONGLONG inHandle, ULONGLONG* outEntitySize) const
 {
    return CatchAll([this, inHandle, outEntitySize]()
    {
@@ -219,7 +219,7 @@ STDMETHODIMP FileSystem::GetSize(ULONG inHandle, ULONG* outEntitySize) const
    });
 }
 
-STDMETHODIMP FileSystem::GetHandle(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outHandle) const
+STDMETHODIMP FileSystem::GetHandle(ULONGLONG inLocationHandle, LPCOLESTR inName, ULONGLONG* outHandle) const
 {
    return CatchAll([this, inLocationHandle, inName, &outHandle]()
    {
@@ -239,7 +239,7 @@ namespace
    }
 
    template <>
-   bool CheckArgs<ULONG, LPCOLESTR>(ULONG, LPCOLESTR inName)
+   bool CheckArgs<ULONGLONG, LPCOLESTR>(ULONGLONG, LPCOLESTR inName)
    {
       return nullptr != inName;
    }
@@ -257,27 +257,27 @@ namespace
    }
 }
 
-STDMETHODIMP FileSystem::IsDirectory(ULONG inHandle, BOOL* outIsDir) const
+STDMETHODIMP FileSystem::IsDirectory(ULONGLONG inHandle, BOOL* outIsDir) const
 {
    return CheckEntityCategory(m_controller, NFileSystem::EntityCategory::Directory, outIsDir, Convert(inHandle));
 }
 
-STDMETHODIMP FileSystem::IsDirectoryByName(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const
+STDMETHODIMP FileSystem::IsDirectoryByName(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const
 {
    return CheckEntityCategory(m_controller, NFileSystem::EntityCategory::Directory, outIsDir, Convert(inLocationHandle), inName);
 }
 
-STDMETHODIMP FileSystem::IsFile(ULONG inHandle, BOOL* outIsFile) const
+STDMETHODIMP FileSystem::IsFile(ULONGLONG inHandle, BOOL* outIsFile) const
 {
    return CheckEntityCategory(m_controller, NFileSystem::EntityCategory::File, outIsFile, Convert(inHandle));
 }
 
-STDMETHODIMP FileSystem::IsFileByName(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outIsFile) const
+STDMETHODIMP FileSystem::IsFileByName(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outIsFile) const
 {
    return CheckEntityCategory(m_controller, NFileSystem::EntityCategory::File, outIsFile, Convert(inLocationHandle), inName);
 }
 
-STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG inCount, ULONG inFromPosition, LPBYTE outBuffer, ULONG* outReadCount) const
+STDMETHODIMP FileSystem::Read(ULONGLONG inHandle, ULONGLONG inCount, ULONGLONG inFromPosition, LPBYTE outBuffer, ULONGLONG* outReadCount) const
 {
    return CatchAll([this, inHandle, inCount, inFromPosition, &outBuffer, &outReadCount]()
    {
@@ -296,7 +296,7 @@ STDMETHODIMP FileSystem::Read(ULONG inHandle, ULONG inCount, ULONG inFromPositio
    });
 }
 
-STDMETHODIMP FileSystem::Write(ULONG inHandle, ULONG inCount, ULONG inToPosition, LPBYTE inBuffer)
+STDMETHODIMP FileSystem::Write(ULONGLONG inHandle, ULONGLONG inCount, ULONGLONG inToPosition, LPBYTE inBuffer)
 {
    return CatchAll([this, inHandle, inCount, inToPosition, &inBuffer]()
    {

@@ -302,9 +302,6 @@
     <CustomBuild Include="COMServer.def" />
   </ItemGroup>
   <ItemGroup>
-    <Midl Include="COMServer.idl" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="Include/ClassFactory.h" />
     <ClInclude Include="Include/GUIDs.h" />
     <ClInclude Include="Include/FSInterface.h" />

@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FileSystemLibTests.cpp">
+    <ClCompile Include="BasicOperationsCorrectness.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

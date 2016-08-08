@@ -19,30 +19,30 @@ public:
    STDMETHOD_(ULONG, Release)() override;
 
 	// IFileSystem methods
-   STDMETHOD(Root)(ULONG* outRootHandle) const override;
-   STDMETHOD(CreateFile)(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outCreatedHandle) override;
-   STDMETHOD(CreateDirectory)(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outCreatedHandle) override;
-   STDMETHOD(Delete)(ULONG inHandle) override;
+   STDMETHOD(Root)(ULONGLONG* outRootHandle) const override;
+   STDMETHOD(CreateFile)(ULONGLONG inLocationHandle, LPCOLESTR inName, ULONGLONG* outCreatedHandle) override;
+   STDMETHOD(CreateDirectory)(ULONGLONG inLocationHandle, LPCOLESTR inName, ULONGLONG* outCreatedHandle) override;
+   STDMETHOD(Delete)(ULONGLONG inHandle) override;
 
-   STDMETHOD(Exists)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const override;
-   STDMETHOD(List)(ULONG inHandle, LPOLESTR** outEntities, ULONG* outCount) const override;
+   STDMETHOD(Exists)(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outResult) const override;
+   STDMETHOD(List)(ULONGLONG inHandle, LPOLESTR** outEntities, ULONGLONG* outCount) const override;
 
-   STDMETHOD(GetName)(ULONG inHandle, LPOLESTR* outName) const override;
-   STDMETHOD(GetSize)(ULONG inHandle, ULONG* outEntitySize) const override;
-   STDMETHOD(GetHandle)(ULONG inLocationHandle, LPCOLESTR inName, ULONG* outHandle) const override;
+   STDMETHOD(GetName)(ULONGLONG inHandle, LPOLESTR* outName) const override;
+   STDMETHOD(GetSize)(ULONGLONG inHandle, ULONGLONG* outEntitySize) const override;
+   STDMETHOD(GetHandle)(ULONGLONG inLocationHandle, LPCOLESTR inName, ULONGLONG* outHandle) const override;
 
-   STDMETHOD(IsDirectory)(ULONG inHandle, BOOL* outIsDir) const override;
-   STDMETHOD(IsDirectoryByName)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const override;
+   STDMETHOD(IsDirectory)(ULONGLONG inHandle, BOOL* outIsDir) const override;
+   STDMETHOD(IsDirectoryByName)(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const override;
 
-   STDMETHOD(IsFile)(ULONG inHandle, BOOL* outIsDir) const override;
-   STDMETHOD(IsFileByName)(ULONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const override;
+   STDMETHOD(IsFile)(ULONGLONG inHandle, BOOL* outIsDir) const override;
+   STDMETHOD(IsFileByName)(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const override;
 
-   STDMETHOD(Read)(ULONG inHandle, ULONG inCount, ULONG inFromPosition, LPBYTE outBuffer, ULONG* outReadCount) const override;
-   STDMETHOD(Write)(ULONG inHandle, ULONG inCount, ULONG inToPosition, LPBYTE inBuffer) override;
+   STDMETHOD(Read)(ULONGLONG inHandle, ULONGLONG inCount, ULONGLONG inFromPosition, LPBYTE outBuffer, ULONGLONG* outReadCount) const override;
+   STDMETHOD(Write)(ULONGLONG inHandle, ULONGLONG inCount, ULONGLONG inToPosition, LPBYTE inBuffer) override;
 
 private:
-   NFileSystem::EntityHandle Convert(ULONG comHandle) const;
-   ULONG Convert(NFileSystem::EntityHandle implHandle) const;
+   NFileSystem::EntityHandle Convert(ULONGLONG comHandle) const;
+   ULONGLONG Convert(NFileSystem::EntityHandle implHandle) const;
 
    NCOMServer::ReferenceCounter m_refCounter;
    NFileSystem::Controller m_controller;

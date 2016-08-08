@@ -1,5 +1,4 @@
 #include "FSEntity.h"
-#include "FSExceptions.h"
 #include <iterator>
 #include <boost/range/adaptors.hpp>
 #include <boost/range/algorithm.hpp>
