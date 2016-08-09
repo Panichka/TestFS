@@ -77,6 +77,7 @@
     <LibraryPath>$(BoostLibsDir);$(LibraryPath)</LibraryPath>
     <OutDir>.\Bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>.\Obj\$(Configuration)\$(Platform)\</IntDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -84,6 +85,7 @@
     <LibraryPath>$(BoostLibsDir);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>.\Bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>.\Obj\$(Configuration)\$(Platform)\</IntDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -91,6 +93,7 @@
     <LibraryPath>$(BoostLibsDir);$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <OutDir>.\Bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>.\Obj\$(Configuration)\$(Platform)\</IntDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -98,6 +101,7 @@
     <LibraryPath>$(BoostLibsDir);$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>.\Bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>.\Obj\$(Configuration)\$(Platform)\</IntDir>
+    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -185,6 +189,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BasicOperationsCorrectness.cpp" />
+    <ClCompile Include="LoadTests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Fixtures.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

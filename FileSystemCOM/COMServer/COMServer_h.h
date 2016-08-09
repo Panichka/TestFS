@@ -4,7 +4,7 @@
 
 
  /* File created by MIDL compiler version 8.00.0603 */
-/* at Tue Jul 19 16:00:44 2016
+/* at Tue Aug 09 13:44:54 2016
  */
 /* Compiler settings for COMServer.idl:
     Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.00.0603 
@@ -66,7 +66,6 @@ typedef struct FileSystem FileSystem;
 
 /* header files for imported files */
 #include "oaidl.h"
-#include "ocidl.h"
 
 #ifdef __cplusplus
 extern "C"{
@@ -88,6 +87,76 @@ EXTERN_C const IID IID_IFileSystem;
     IFileSystem : public IUnknown
     {
     public:
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE Root( 
+            /* [in] */ ULONGLONG *outRootHandle) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE CreateFile( 
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ ULONGLONG *outCreatedHandle) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE CreateDirectory( 
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ ULONGLONG *outCreatedHandle) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE Delete( 
+            /* [in] */ ULONGLONG inHandle) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE Exists( 
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ BOOL *outResult) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE List( 
+            /* [in] */ ULONGLONG inHandle,
+            /* [out] */ LPOLESTR **outEntities,
+            /* [out] */ ULONGLONG *outCount) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE GetName( 
+            /* [in] */ ULONGLONG inHandle,
+            /* [retval][out] */ LPOLESTR *outName) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE GetSize( 
+            /* [in] */ ULONGLONG inHandle,
+            /* [retval][out] */ ULONGLONG *outEntitySize) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE GetHandle( 
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ ULONGLONG *outHandle) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE IsDirectory( 
+            /* [in] */ ULONGLONG inHandle,
+            /* [retval][out] */ BOOL *outIsDir) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE IsDirectoryByName( 
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ BOOL *outIsDir) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE IsFile( 
+            /* [in] */ ULONGLONG inHandle,
+            /* [retval][out] */ BOOL *outIsFile) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE IsFileByName( 
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ BOOL *outIsFile) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE Read( 
+            /* [in] */ ULONGLONG inHandle,
+            /* [in] */ ULONGLONG inCount,
+            /* [in] */ ULONGLONG inFromPosition,
+            /* [out] */ BYTE *outBuffer,
+            /* [out] */ ULONGLONG *outReadCount) = 0;
+        
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE Write( 
+            /* [in] */ ULONGLONG inHandle,
+            /* [in] */ ULONGLONG inCount,
+            /* [in] */ ULONGLONG inToPosition,
+            /* [in] */ BYTE *inBuffer) = 0;
+        
     };
     
     
@@ -108,6 +177,91 @@ EXTERN_C const IID IID_IFileSystem;
         
         ULONG ( STDMETHODCALLTYPE *Release )( 
             IFileSystem * This);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *Root )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG *outRootHandle);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *CreateFile )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ ULONGLONG *outCreatedHandle);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *CreateDirectory )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ ULONGLONG *outCreatedHandle);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *Delete )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inHandle);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *Exists )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ BOOL *outResult);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *List )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inHandle,
+            /* [out] */ LPOLESTR **outEntities,
+            /* [out] */ ULONGLONG *outCount);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *GetName )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inHandle,
+            /* [retval][out] */ LPOLESTR *outName);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *GetSize )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inHandle,
+            /* [retval][out] */ ULONGLONG *outEntitySize);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *GetHandle )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ ULONGLONG *outHandle);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *IsDirectory )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inHandle,
+            /* [retval][out] */ BOOL *outIsDir);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *IsDirectoryByName )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ BOOL *outIsDir);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *IsFile )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inHandle,
+            /* [retval][out] */ BOOL *outIsFile);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *IsFileByName )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inLocationHandle,
+            /* [in] */ LPCOLESTR inName,
+            /* [retval][out] */ BOOL *outIsFile);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *Read )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inHandle,
+            /* [in] */ ULONGLONG inCount,
+            /* [in] */ ULONGLONG inFromPosition,
+            /* [out] */ BYTE *outBuffer,
+            /* [out] */ ULONGLONG *outReadCount);
+        
+        /* [id] */ HRESULT ( STDMETHODCALLTYPE *Write )( 
+            IFileSystem * This,
+            /* [in] */ ULONGLONG inHandle,
+            /* [in] */ ULONGLONG inCount,
+            /* [in] */ ULONGLONG inToPosition,
+            /* [in] */ BYTE *inBuffer);
         
         END_INTERFACE
     } IFileSystemVtbl;
@@ -132,6 +286,51 @@ EXTERN_C const IID IID_IFileSystem;
     ( (This)->lpVtbl -> Release(This) ) 
 
 
+#define IFileSystem_Root(This,outRootHandle)	\
+    ( (This)->lpVtbl -> Root(This,outRootHandle) ) 
+
+#define IFileSystem_CreateFile(This,inLocationHandle,inName,outCreatedHandle)	\
+    ( (This)->lpVtbl -> CreateFile(This,inLocationHandle,inName,outCreatedHandle) ) 
+
+#define IFileSystem_CreateDirectory(This,inLocationHandle,inName,outCreatedHandle)	\
+    ( (This)->lpVtbl -> CreateDirectory(This,inLocationHandle,inName,outCreatedHandle) ) 
+
+#define IFileSystem_Delete(This,inHandle)	\
+    ( (This)->lpVtbl -> Delete(This,inHandle) ) 
+
+#define IFileSystem_Exists(This,inLocationHandle,inName,outResult)	\
+    ( (This)->lpVtbl -> Exists(This,inLocationHandle,inName,outResult) ) 
+
+#define IFileSystem_List(This,inHandle,outEntities,outCount)	\
+    ( (This)->lpVtbl -> List(This,inHandle,outEntities,outCount) ) 
+
+#define IFileSystem_GetName(This,inHandle,outName)	\
+    ( (This)->lpVtbl -> GetName(This,inHandle,outName) ) 
+
+#define IFileSystem_GetSize(This,inHandle,outEntitySize)	\
+    ( (This)->lpVtbl -> GetSize(This,inHandle,outEntitySize) ) 
+
+#define IFileSystem_GetHandle(This,inLocationHandle,inName,outHandle)	\
+    ( (This)->lpVtbl -> GetHandle(This,inLocationHandle,inName,outHandle) ) 
+
+#define IFileSystem_IsDirectory(This,inHandle,outIsDir)	\
+    ( (This)->lpVtbl -> IsDirectory(This,inHandle,outIsDir) ) 
+
+#define IFileSystem_IsDirectoryByName(This,inLocationHandle,inName,outIsDir)	\
+    ( (This)->lpVtbl -> IsDirectoryByName(This,inLocationHandle,inName,outIsDir) ) 
+
+#define IFileSystem_IsFile(This,inHandle,outIsFile)	\
+    ( (This)->lpVtbl -> IsFile(This,inHandle,outIsFile) ) 
+
+#define IFileSystem_IsFileByName(This,inLocationHandle,inName,outIsFile)	\
+    ( (This)->lpVtbl -> IsFileByName(This,inLocationHandle,inName,outIsFile) ) 
+
+#define IFileSystem_Read(This,inHandle,inCount,inFromPosition,outBuffer,outReadCount)	\
+    ( (This)->lpVtbl -> Read(This,inHandle,inCount,inFromPosition,outBuffer,outReadCount) ) 
+
+#define IFileSystem_Write(This,inHandle,inCount,inToPosition,inBuffer)	\
+    ( (This)->lpVtbl -> Write(This,inHandle,inCount,inToPosition,inBuffer) ) 
+
 #endif /* COBJMACROS */
 
 
@@ -148,7 +347,7 @@ EXTERN_C const IID IID_IFileSystem;
 #define __COMServerLib_LIBRARY_DEFINED__
 
 /* library COMServerLib */
-/* [helpstring][version][uuid] */ 
+/* [version][uuid] */ 
 
 
 EXTERN_C const IID LIBID_COMServerLib;

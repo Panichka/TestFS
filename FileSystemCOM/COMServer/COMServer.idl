@@ -1,30 +1,41 @@
 import "oaidl.idl";
-import "ocidl.idl";
 
-// Define IFileSystem interface
 [
-    object,
-    uuid(5B26AF8D-EF23-4f1d-A742-3CC4C2F28980),
-    dual,
-    helpstring("IFileSystem Interface"),
-    pointer_default(unique)
+   object,
+   uuid(5B26AF8D-EF23-4f1d-A742-3CC4C2F28980),
+   dual,
+   helpstring("IFileSystem Interface"),
+   pointer_default(unique)
 ]
-interface IFileSystem : IUnknown
-{
+interface IFileSystem : IUnknown {
+   [id(1)] HRESULT Root([in] ULONGLONG* outRootHandle);
+   [id(2)] HRESULT CreateFile([in] ULONGLONG inLocationHandle, [in] LPCOLESTR inName, [out, retval] ULONGLONG* outCreatedHandle);
+   [id(3)] HRESULT CreateDirectory([in] ULONGLONG inLocationHandle, [in] LPCOLESTR inName, [out, retval] ULONGLONG* outCreatedHandle);
+   [id(4)] HRESULT Delete([in] ULONGLONG inHandle);
+   [id(5)] HRESULT Exists([in] ULONGLONG inLocationHandle, [in] LPCOLESTR inName, [out, retval] BOOL* outResult);
+   [id(6)] HRESULT List([in] ULONGLONG inHandle, [out] LPOLESTR** outEntities, [out] ULONGLONG* outCount);
+   [id(7)] HRESULT GetName([in] ULONGLONG inHandle, [out, retval] LPOLESTR* outName);
+   [id(8)] HRESULT GetSize([in] ULONGLONG inHandle, [out, retval] ULONGLONG* outEntitySize);
+   [id(9)] HRESULT GetHandle([in] ULONGLONG inLocationHandle, [in] LPCOLESTR inName, [out, retval] ULONGLONG* outHandle);
+   [id(10)] HRESULT IsDirectory([in] ULONGLONG inHandle, [out, retval] BOOL* outIsDir);
+   [id(11)] HRESULT IsDirectoryByName([in] ULONGLONG inLocationHandle, [in] LPCOLESTR inName, [out, retval] BOOL* outIsDir);
+   [id(12)] HRESULT IsFile([in] ULONGLONG inHandle, [out, retval] BOOL* outIsFile);
+   [id(13)] HRESULT IsFileByName([in] ULONGLONG inLocationHandle, [in] LPCOLESTR inName, [out, retval] BOOL* outIsFile);
+   [id(14)] HRESULT Read([in] ULONGLONG inHandle, [in] ULONGLONG inCount, [in] ULONGLONG inFromPosition, [out] BYTE* outBuffer, [out] ULONGLONG* outReadCount);
+   [id(15)] HRESULT Write([in] ULONGLONG inHandle, [in] ULONGLONG inCount, [in] ULONGLONG inToPosition, [in] BYTE* inBuffer);
 };
-
-// Library statement
 [
-    uuid(c145acf1-5472-486c-87bf-497f815ccb58),
-    version(1.0),
-    helpstring("COMServer Type Library")
+   uuid(013DD964-CB74-43E0-9E40-31E01DD44991),
+   version(1.0),
 ]
 library COMServerLib
 {
-    importlib("stdole32.tlb");
-    [uuid(438B8FDC-7DB8-4a3b-9814-931FDAB531DA)]
-    coclass FileSystem
-    {
-        [default] interface IFileSystem;
-    };
+   importlib("stdole2.tlb");
+   [
+      uuid(438B8FDC-7DB8-4a3b-9814-931FDAB531DA)
+   ]
+   coclass FileSystem
+   {
+      [default] interface IFileSystem;
+   };
 };

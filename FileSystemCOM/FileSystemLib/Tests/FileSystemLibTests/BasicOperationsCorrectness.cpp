@@ -1,28 +1,13 @@
-#define BOOST_TEST_MODULE ExampleTestModule
+#define BOOST_TEST_MODULE FileSystemTestModule
 #include <boost/test/unit_test.hpp>
-#include <boost/filesystem.hpp>
 
-#include "FSController.h"
+#include "Fixtures.h"
 
 using namespace boost;
 using namespace boost::unit_test;
 using namespace NFileSystem;
 
 BOOST_AUTO_TEST_SUITE(FileSystemLibTestSuite)
-
-struct ControllerFixture
-{
-   ControllerFixture()
-      : Internal(std::make_unique<Controller>())
-   { }
-
-   ~ControllerFixture()
-   {
-	   filesystem::remove(boost::filesystem::current_path() /= "fs.rawdata");
-   }
-
-   std::shared_ptr<Controller> Internal;
-};
 
 BOOST_FIXTURE_TEST_CASE(FSInitialization, ControllerFixture)
 {
@@ -112,25 +97,6 @@ BOOST_FIXTURE_TEST_CASE(SaveDataAfterShutDown, ControllerFixture)
    BOOST_CHECK(readResult.second = sizeof(data));
    BOOST_CHECK(0 == memcmp(readResult.first.get(), data, readResult.second));
 }
-
-template<EntityCategory category>
-struct ControllerWithEntity : private ControllerFixture
-{
-	ControllerWithEntity()
-		: ControllerFixture()
-		, WeakInternal(Internal)
-	{
-		Root = Internal->Root();
-		Name = std::to_wstring(std::rand());
-		Entity = Internal->Create(Root, Name, category);
-	}
-
-	std::weak_ptr<Controller> WeakInternal;
-	EntityHandle Root;
-	EntityHandle Entity;
-	std::wstring Name;
-	EntityCategory Category = category;
-};
 
 BOOST_FIXTURE_TEST_CASE(ReadAndWriteWithOffset, ControllerWithEntity<EntityCategory::File>)
 {

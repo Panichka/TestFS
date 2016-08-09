@@ -53,4 +53,9 @@
       <Filter>Sources</Filter>
     </CustomBuild>
   </ItemGroup>
+  <ItemGroup>
+    <Midl Include="COMServer.idl">
+      <Filter>Sources</Filter>
+    </Midl>
+  </ItemGroup>
 </Project>

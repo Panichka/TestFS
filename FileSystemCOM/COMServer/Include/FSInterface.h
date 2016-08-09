@@ -32,8 +32,8 @@ struct IFileSystem : IUnknown
    STDMETHOD(IsDirectory)(ULONGLONG inHandle, BOOL* outIsDir) const = 0;
    STDMETHOD(IsDirectoryByName)(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const = 0;
 
-   STDMETHOD(IsFile)(ULONGLONG inHandle, BOOL* outIsDir) const = 0;
-   STDMETHOD(IsFileByName)(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outIsDir) const = 0;
+   STDMETHOD(IsFile)(ULONGLONG inHandle, BOOL* outIsFile) const = 0;
+   STDMETHOD(IsFileByName)(ULONGLONG inLocationHandle, LPCOLESTR inName, BOOL* outIsFile) const = 0;
 
 	STDMETHOD(Read)(ULONGLONG inHandle, ULONGLONG inCount, ULONGLONG inFromPosition, LPBYTE outBuffer, ULONGLONG* outReadCount) const = 0;
 	STDMETHOD(Write)(ULONGLONG inHandle, ULONGLONG inCount, ULONGLONG inToPosition, LPBYTE inBuffer) = 0;

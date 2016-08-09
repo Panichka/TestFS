@@ -310,6 +310,9 @@
     <ClInclude Include="Include/ReferenceCounter.h" />
     <ClInclude Include="Include/Registrar.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Midl Include="COMServer.idl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
