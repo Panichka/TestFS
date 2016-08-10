@@ -101,8 +101,9 @@ int main()
          });
 
          ULONGLONG rootHandle;
-         if (FAILED(ifs.Ptr->Root(&rootHandle)))
-            return;
+         HRESULT result = ifs.Ptr->Root(&rootHandle);
+         if (FAILED(result))
+            throw result;
 
          const uint32_t childCount = 2u;
          const uint32_t nestingDepth = 3u;
